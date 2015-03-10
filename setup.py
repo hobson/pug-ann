@@ -1,4 +1,5 @@
 # setup.py for PUG (PDX Python User Group) package
+__parent_package__ = 'pug'
 package_name = 'ann'
 
 from setuptools import find_packages
@@ -12,7 +13,7 @@ import os
 # # setup(cmdclass={'test': test},...
 
 global_env, env = {}, {}
-execfile(os.path.join(package_name, 'package_info.py'), global_env, env)
+execfile(os.path.join(__parent_package__, package_name, 'package_info.py'), global_env, env)
 
 version = env.get('__version__', '0.0.1')
 long_description = env.get('__doc__', '0.0.1')
