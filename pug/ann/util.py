@@ -4,6 +4,7 @@ TODO:
     Incorporate into pybrain fork so pug doesn't have to depend on pybrain
 
 """
+from __future__ import print_function
 import os
 
 import pandas as pd
@@ -66,6 +67,8 @@ def pybrain_dataset_from_dataframe(df, inputs=['Max Humidity', ' Mean Humidity',
 def build_trainer(nn, ds, verbosity=1):
     return pb.supervised.trainers.rprop.RPropMinusTrainer(nn, dataset=ds, batchlearning=True, verbose=bool(verbosity > 1))
 
+
+# # FIXME: resolve all these NLP dependencies and get this working
 
 # def pybrain_dataset_from_time_series(df, N_inp=None, features=('moy',), verbosity=1):
 #     """Build a pybrains.dataset from the time series contained in a dataframe"""
@@ -171,10 +174,6 @@ def build_trainer(nn, ds, verbosity=1):
 #         ds.addSample(inputs, list(sample['target'].values))
 
 #     return ds, mean, std, thresh
-
-
-def weather_predictor(location):
-    pass
 
 
 
