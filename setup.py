@@ -1,6 +1,7 @@
 # setup.py for PUG (PDX Python User Group) package
-__parent_package__ = 'pug'
-package_name = 'ann'
+__namespace_package__ = 'pug'
+__subpackage__ = 'ann'
+package_name = '{}-{}'.format(__namespace_package__, __subpackage__)
 
 from setuptools import find_packages
 from distutils.core import setup
@@ -13,7 +14,7 @@ import os
 # # setup(cmdclass={'test': test},...
 
 global_env, env = {}, {}
-execfile(os.path.join(__parent_package__, package_name, 'package_info.py'), global_env, env)
+execfile(os.path.join(__namespace_package__, package_name, 'package_info.py'), global_env, env)
 
 version = env.get('__version__', '0.0.1')
 long_description = env.get('__doc__', '0.0.1')
@@ -49,10 +50,10 @@ setup(
     include_package_data = True,  # install non-.py files listed in MANIFEST.in (.js, .html, .txt, .md, etc)
     install_requires = install_requires,
     dependency_links = dependency_links,
-    scripts=['pug/bin/jira.py'],
-    entry_points={'console_scripts': [
-        'jira = pug.crawlnmine.management:execute_from_command_line',
-    ]},
+    # scripts=['pug/bin/test_ann.py'],
+    # entry_points={'console_scripts': [
+    #     'test-ann = pug.ann.tests.run',
+    # ]},
     version = version,
     description = description,
     long_description = long_description,
@@ -70,7 +71,7 @@ setup(
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Environment :: Other Environment",
         # "Environment :: Console",
         "Intended Audience :: Developers",
@@ -78,10 +79,6 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        "Topic :: Scientific/Engineering :: Visualization",
         "Topic :: Scientific/Engineering :: Mathematics",
-        "Topic :: Scientific/Engineering :: GIS",
-        "Topic :: Database :: Front-Ends",
-        "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
         ],
 )
