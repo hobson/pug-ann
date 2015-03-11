@@ -8,7 +8,7 @@ This is a namespace package (sub-package) of the pug package a collection of uti
 
 ## Introduction
 
-Artificial Neural Network utilities by and for the PDX Python User Group.
+Artificial Neural Network utilities by and for the PDX Python User Group (PUG).
 
 ---
 

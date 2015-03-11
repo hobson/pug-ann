@@ -1,7 +1,7 @@
 # setup.py for PUG (PDX Python User Group) package
 __namespace_package__ = 'pug'
 __subpackage__ = 'ann'
-package_name = '{}-{}'.format(__namespace_package__, __subpackage__)
+project_name = '{}-{}'.format(__namespace_package__, __subpackage__)
 
 from setuptools import find_packages
 from distutils.core import setup
@@ -14,11 +14,11 @@ import os
 # # setup(cmdclass={'test': test},...
 
 global_env, env = {}, {}
-execfile(os.path.join(__namespace_package__, package_name, 'package_info.py'), global_env, env)
+execfile(os.path.join(__namespace_package__, project_name, 'package_info.py'), global_env, env)
 
 version = env.get('__version__', '0.0.1')
 long_description = env.get('__doc__', '0.0.1')
-package_docstring = env.get('__doc__', '`{}` python package'.format(package_name))
+package_docstring = env.get('__doc__', '`{}` python package'.format(project_name))
 description = package_docstring.split(',')[0]
 long_description = package_docstring
 __url__  = env.get('__url__', 'http://github.com/hobson/')
@@ -29,7 +29,7 @@ try:
 except (IOError, ImportError, OSError):
     pass
 
-print('Installing package named {}. . .'.format(package_name))
+print('Installing package named {}. . .'.format(project_name))
 
 try:
     from pip.req import parse_requirements
@@ -45,8 +45,8 @@ print('Dependency links: {}'.format(dependency_links))
 EXCLUDE_FROM_PACKAGES = []
 
 setup(
-    name = package_name,
-    packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),   #[package_name],  
+    name = project_name,
+    packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
     include_package_data = True,  # install non-.py files listed in MANIFEST.in (.js, .html, .txt, .md, etc)
     install_requires = install_requires,
     dependency_links = dependency_links,
