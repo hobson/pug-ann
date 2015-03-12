@@ -1,7 +1,11 @@
 # setup.py for PUG (PDX Python User Group) package
+# the parent name (perhaps a namespace package) you'd import
 __namespace_package__ = 'pug'
+# the subpackage that this installer is providing that you'd import like __import__(__namespace_package__ + '.' + '__subpackage__')
 __subpackage__ = 'ann'
+# the name as it will appear in the pypi cheeseshop repositor, not the name you'd use to import it
 project_name = '{}-{}'.format(__namespace_package__, __subpackage__)
+package_name = '{}.{}'.format(__namespace_package__, __subpackage__)
 
 from setuptools import find_packages
 from distutils.core import setup
@@ -14,7 +18,7 @@ import os
 # # setup(cmdclass={'test': test},...
 
 global_env, env = {}, {}
-execfile(os.path.join(__namespace_package__, project_name, 'package_info.py'), global_env, env)
+execfile(os.path.join(__namespace_package__, __subpackage__, 'package_info.py'), global_env, env)
 
 version = env.get('__version__', '0.0.1')
 long_description = env.get('__doc__', '0.0.1')
@@ -29,7 +33,7 @@ try:
 except (IOError, ImportError, OSError):
     pass
 
-print('Installing package named {}. . .'.format(project_name))
+print('Installing package named {} from the {} project. . .'.format(package_name, project_name))
 
 try:
     from pip.req import parse_requirements
@@ -45,9 +49,12 @@ print('Dependency links: {}'.format(dependency_links))
 EXCLUDE_FROM_PACKAGES = []
 
 setup(
-    name = project_name,
+    name=project_name,
     packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
-    include_package_data = True,  # install non-.py files listed in MANIFEST.in (.js, .html, .txt, .md, etc)
+    namespace_packages=[__namespace_package__],
+
+    # install non-.py files listed in MANIFEST.in (.js, .html, .txt, .md, etc)
+    include_package_data = True,
     install_requires = install_requires,
     dependency_links = dependency_links,
     # scripts=['pug/bin/test_ann.py'],
@@ -67,7 +74,7 @@ setup(
 
     # Force setup.py to use the latest github master source files rather than the cheeseshop tarball: 
     download_url = "{0}/tarball/master".format(__url__),
-    keywords = ["agent", "bot", "ai", "crawl", "data", "science", "data science", "math", "machine-learning", "statistics", "database"],
+    keywords = ["artificial neural network", "neural network", "pybrain", "agent", "bot", "ai", "crawl", "data", "science", "data science", "math", "machine-learning", "statistics", "database"],
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
