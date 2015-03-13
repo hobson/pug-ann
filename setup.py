@@ -17,8 +17,12 @@ import os
 # #    you need to say so in your setup(kwargs) below, like this:
 # # setup(cmdclass={'test': test},...
 
+print('Installing package named {} from the {} project. . .'.format(package_name, project_name))
+
 global_env, env = {}, {}
 execfile(os.path.join(__namespace_package__, __subpackage__, 'package_info.py'), global_env, env)
+
+print('Found pacakge info: {}'.format(env))
 
 version = env.get('__version__', '0.0.1')
 package_docstring = env.get('__doc__', '`{}` python package'.format(project_name))
@@ -32,13 +36,14 @@ try:
 except (IOError, ImportError, OSError):
     pass
 
-print('Installing package named {} from the {} project. . .'.format(package_name, project_name))
 
 try:
     from pip.req import parse_requirements
     requirements = list(parse_requirements('requirements.txt'))
 except:
     requirements = []
+print('requirements: {}'.format(requirements))
+
 install_requires=[str(req).split(' ')[0].strip() for req in requirements if req.req and not req.url]
 print('Install requires: {}'.format(install_requires))
 dependency_links=[req.url for req in requirements if req.url]

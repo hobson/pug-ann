@@ -221,7 +221,11 @@ def plot_network_results(network, ds=None, mean=0, std=1, title='', show=True, s
     plt.title(title)
 
     if show:
-        plt.show(block=False)
+        try:
+            # ipython notebook overrides plt.show and doesn't have a block kwarg
+            plt.show(block=False)
+        except TypeError:
+            plt.show()
     if save:
         filename = 'ann_performance_for_{0}.png'.format(title).replace(' ', '_')
         if isinstance(save, basestring) and os.path.isdir(save):
