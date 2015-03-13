@@ -17,7 +17,7 @@ pb = pybrain
 
 #import pug.nlp.util as nlp
 
-print(os.path.realpath(__file__))
+# print(os.path.realpath(__file__))
 DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
 
