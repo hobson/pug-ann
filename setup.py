@@ -44,6 +44,8 @@ try:
     from pip.req import parse_requirements
     requirements = list(parse_requirements('requirements.txt'))
 except:
+    from traceback import print_exc
+    print_exc()
     requirements = []
 print('requirements: {}'.format(requirements))
 
