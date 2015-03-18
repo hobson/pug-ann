@@ -17,10 +17,9 @@ pytz==2014.10
 python-dateutil==2.4.0
 
 pandas==0.15.2
-matplotlib
-scipy==0.15.1
--e git+git@github.com:pybrain/pybrain.git@master#egg=pybrain-master
 
 #$ sudo yum install libjpeg-devel openjpeg-devel
 Pillow==2.7
 matplotlib==1.4.3
+
+-e git+git@github.com:pybrain/pybrain.git@master#egg=pybrain-master
