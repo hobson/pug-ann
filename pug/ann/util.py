@@ -79,7 +79,7 @@ def build_trainer(nn, ds, verbosity=1):
 #     # The order that the feature vectors should appear in the input vector to remain consistent 
 #     #   and neural net architecture can have structure that anticipates this.
 #     sorted_features = nlp.sort_strings(features, ('dat', 'dow', 'moy', 'dom', 'moy', 'mor'), case_sensitive=False)
-#     if verbosity:
+#     if verbosity > 0:
 #         print('pybrain_dataset_from_thresh(features={0})'.format(features))
 
 #     samples, mean, std, thresh = simple_dataset_from_thresh(thresh, N=N, max_window=max_window, normalize=normalize, ignore_below=ignore_below)
@@ -112,12 +112,12 @@ def build_trainer(nn, ds, verbosity=1):
 #                 try:
 #                     morn = int(s[4:])
 #                 except:
-#                     if verbosity:
+#                     if verbosity > 0:
 #                         warnings.warn('Unable to determine morning length from feature named "{0}" so using default (8 am = 8 * 4 = 32)')
 #                     morn = 32  # default to 9 am morning ending
 #                 break
 
-#     if verbosity:
+#     if verbosity > 0:
 #         print('In pybrain_dataset_from_thresh() using {0} morning load values for Building {1} because series arg is of type {2}'.format(morn, name, type(series)))
 
 #     extras = (+ int('dow' in features) * 7
@@ -126,7 +126,7 @@ def build_trainer(nn, ds, verbosity=1):
 #               + int('date' in features)
 #               + morn)
 
-#     if verbosity:
+#     if verbosity > 0:
 #         print('The total input vector length (dimension) is now {0}'.format(N + extras))
 #     ds = pb.datasets.SupervisedDataSet(N + extras, 1)
 #     first_date = samples[0]['target'].index[0].date().toordinal()
@@ -135,7 +135,7 @@ def build_trainer(nn, ds, verbosity=1):
 
 #     bit_scale = 5  # number of standard deviations for the magnitude of bit            
 
-#     if verbosity:
+#     if verbosity > 0:
 #         print('Adding features for building {3}, {0}, and a morning time series of len {2}, to each of the {1} vectors (samples)'.format(features, len(samples), morn, name))
 
 #     for sampnum, sample in enumerate(samples):

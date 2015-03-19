@@ -13,10 +13,10 @@ def airport(location='Fresno, CA', date='2012/1/1', verbosity=1):
     suffix = '/CustomHistory.html?dayend=1&monthend=1&yearend=2015&req_city=&req_state=&req_statename=&reqdb.zip=&reqdb.magic=&reqdb.wmo=&MR=1&format=1'
     prefix = 'http://www.wunderground.com/history/'
     url = prefix + 'airport/' + airport.locations.get(location, location) + '/' + date + suffix
-    if verbosity:
+    if verbosity > 0:
         print('GETing csv from "{0}"'.format(url))
     buf = urllib.urlopen(url).read()
-    if verbosity:
+    if verbosity > 0:
         N = buf.count('\n')
         M = (buf.count(',') + N) / float(N)
         print('Retrieved CSV with appox. {0} lines, {2} columns, or {1} cells.'.format(N, int(M * N), M))
@@ -32,7 +32,7 @@ def airport(location='Fresno, CA', date='2012/1/1', verbosity=1):
         df = df.iloc[1:]
     df.columns = [label.strip() for label in df.columns]
 
-    if verbosity:
+    if verbosity > 0:
         print(df.describe())
     columns = df.columns.values
     columns[-1] = re.sub(r'<br\s*[/]?>','', columns[-1])
