@@ -8,6 +8,7 @@ from __future__ import print_function
 import os
 
 import pandas as pd
+np = pd.np
 from matplotlib import pyplot as plt
 import pybrain.datasets
 import pybrain.structure
@@ -21,7 +22,7 @@ pb = pybrain
 DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
 
-def build_neural_net(N_input=None, N_hidden=2, N_output=1):
+def build_ann(N_input=None, N_hidden=2, N_output=1):
     """Build a neural net with the provided parameters (p) and input dimensions (N_input)
 
     Arguments:
@@ -30,7 +31,7 @@ def build_neural_net(N_input=None, N_hidden=2, N_output=1):
             (this is the only parameter that affects the NN build)
 
     Returns:
-        FeedForwardNetwork with N_input inputs and N_hidden hidden nodes
+        FeedForwardNetwork with N_input + N_hidden + N_output nodes in 3 layers
     """
     N_input = N_input or 1
     N_output = N_output or 1
@@ -54,26 +55,32 @@ def build_neural_net(N_input=None, N_hidden=2, N_output=1):
     return nn
 
 
-def neural_net_from_dataset(ds=None, N_input=3, N_hidden=0, N_output=1):
+def ann_from_ds(ds=None, N_input=3, N_hidden=0, N_output=1):
     N_input = getattr(ds, 'indim', N_input)
     N_output = getattr(ds, 'outdim', N_output)
     N_hidden = getattr(ds, 'paramdim', N_hidden + N_input + N_output) - N_hidden - N_output
 
-    return build_neural_net(N_input=N_input, N_hidden=N_hidden, N_output=N_output)
+    return build_ann(N_input=N_input, N_hidden=N_hidden, N_output=N_output)
 
 
-def pybrain_dataset_from_dataframe(df, inputs=['Max Humidity', ' Mean Humidity', ' Min Humidity'], outputs=['Max TemperatureF'], normalize=True):
-    N_inp = len(inputs)
+def dataset_from_dataframe(df, delays=7, inputs=['Max TemperatureF', 'Max Humidity', ' Mean Humidity', ' Min Humidity'], outputs=['Max TemperatureF'], normalize=True):
+    if isinstance(delays, int):
+        delays = range(1, delays+1)
+    delays = np.array(int(i) for i in delays)
+    inputs = [df.columns[int(inp)] if isinstance(inp, (float, int)) else str(inp) for inp in inputs]
+
+    N_inp = len(inputs) * len(delays)
     N_out = len(outputs)
 
-    mean, std = 0, 1
+    means, stds = np.zero0, 1
     if normalize:
-        mean, std = df[inputs[0]].mean(), df[inputs[0]].std()
+        means, stds = df[inputs].mean(), df[inputs].std()
 
     ds = pb.datasets.SupervisedDataSet(N_inp, N_out)
     for sample in df[inputs + outputs].values:
-        ds.addSample((sample[:N_inp] - mean) / std, sample[N_inp:])
+        ds.addSample((sample[:N_inp] - means[:N_inp]) / stds[:N_inp], sample[N_inp:])
     return ds
+
 
 
 def build_trainer(nn, ds, verbosity=1):
@@ -83,7 +90,7 @@ def build_trainer(nn, ds, verbosity=1):
 
 # # FIXME: resolve all these NLP dependencies and get this working
 
-# def pybrain_dataset_from_time_series(df, N_inp=None, features=('moy',), verbosity=1):
+# def dataset_from_time_series(df, N_inp=None, features=('moy',), verbosity=1):
 #     """Build a pybrains.dataset from the time series contained in a dataframe"""
 #     N_inp = N_inp or len(df.columns)
 #     features = features or []
@@ -93,7 +100,7 @@ def build_trainer(nn, ds, verbosity=1):
 #     #   and neural net architecture can have structure that anticipates this.
 #     sorted_features = nlp.sort_strings(features, ('dat', 'dow', 'moy', 'dom', 'moy', 'mor'), case_sensitive=False)
 #     if verbosity > 0:
-#         print('pybrain_dataset_from_thresh(features={0})'.format(features))
+#         print('dataset_from_thresh(features={0})'.format(features))
 
 #     samples, mean, std, thresh = simple_dataset_from_thresh(thresh, N=N, max_window=max_window, normalize=normalize, ignore_below=ignore_below)
 
@@ -131,7 +138,7 @@ def build_trainer(nn, ds, verbosity=1):
 #                 break
 
 #     if verbosity > 0:
-#         print('In pybrain_dataset_from_thresh() using {0} morning load values for Building {1} because series arg is of type {2}'.format(morn, name, type(series)))
+#         print('In dataset_from_thresh() using {0} morning load values for Building {1} because series arg is of type {2}'.format(morn, name, type(series)))
 
 #     extras = (+ int('dow' in features) * 7
 #               + int('moy' in features) * 12
