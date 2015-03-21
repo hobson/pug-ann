@@ -21,33 +21,45 @@ pb = pybrain
 DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
 
-def build_neural_net(ds=None, N_hid=0, N_inp=3, N_out=1):
-    N_inp = getattr(ds, 'indim', N_inp)
-    N_out = getattr(ds, 'outdim', N_out)
-    N_hid = getattr(ds, 'paramdim', N_hid + N_inp + N_out) - N_hid - N_out
+def build_neural_net(N_input=None, N_hidden=2, N_output=1):
+    """Build a neural net with the provided parameters (p) and input dimensions (N_input)
+
+    Arguments:
+        params (dict or PyBrainParams namedtuple): 
+            default: {'N_hidden': 6}
+            (this is the only parameter that affects the NN build)
+
+    Returns:
+        FeedForwardNetwork with N_input inputs and N_hidden hidden nodes
+    """
+    N_input = N_input or 1
+    N_output = N_output or 1
 
     nn = pb.structure.FeedForwardNetwork()
 
     # layers
-    inlay = pb.structure.LinearLayer(N_inp, name='input')
-    nn.addInputModule(inlay)
-    outlay = pb.structure.LinearLayer(N_out, name='output')
-    nn.addOutputModule(outlay)
+    nn.addInputModule(pb.structure.BiasUnit(name='bias'))
+    nn.addInputModule(pb.structure.LinearLayer(N_input, name='input'))
+    if N_hidden:
+        nn.addModule(pb.structure.LinearLayer(N_hidden, name='hidden'))
+    nn.addOutputModule(pb.structure.LinearLayer(N_output, name='output'))
 
     # connections
-    if N_hid:
-        hidlay = pb.structure.LinearLayer(N_hid, name='hidden')
-        nn.addModule(hidlay)
-        in_to_hid = pb.structure.FullConnection(inlay, hidlay)
-        hid_to_out = pb.structure.FullConnection(hidlay, outlay)
-        nn.addConnection(in_to_hid)
-        nn.addConnection(hid_to_out)
-    else:
-        in_to_out = pb.structure.FullConnection(inlay, outlay)
-        nn.addConnection(in_to_out)
+    nn.addConnection(pb.structure.FullConnection(nn['bias'],  nn['hidden'] if N_hidden else nn['output']))
+    nn.addConnection(pb.structure.FullConnection(nn['input'], nn['hidden'] if N_hidden else nn['output']))
+    if N_hidden:
+        nn.addConnection(pb.structure.FullConnection(nn['hidden'], nn['output']))
 
     nn.sortModules()
     return nn
+
+
+def neural_net_from_dataset(ds=None, N_input=3, N_hidden=0, N_output=1):
+    N_input = getattr(ds, 'indim', N_input)
+    N_output = getattr(ds, 'outdim', N_output)
+    N_hidden = getattr(ds, 'paramdim', N_hidden + N_input + N_output) - N_hidden - N_output
+
+    return build_neural_net(N_input=N_input, N_hidden=N_hidden, N_output=N_output)
 
 
 def pybrain_dataset_from_dataframe(df, inputs=['Max Humidity', ' Mean Humidity', ' Min Humidity'], outputs=['Max TemperatureF'], normalize=True):
@@ -65,6 +77,7 @@ def pybrain_dataset_from_dataframe(df, inputs=['Max Humidity', ' Mean Humidity',
 
 
 def build_trainer(nn, ds, verbosity=1):
+    """Configure neural net trainer from a pybrain dataset"""
     return pb.supervised.trainers.rprop.RPropMinusTrainer(nn, dataset=ds, batchlearning=True, verbose=bool(verbosity > 1))
 
 
