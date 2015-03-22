@@ -49,24 +49,24 @@ def airport(location='Fresno, CA', years=1, verbosity=1):
             print('Retrieved CSV for airport code "{}" with appox. {} lines and {} columns = {} cells.'.format(
                   airport_code, N, int(round(M)), int(round(M)) * N))
 
-        try:
-            df0 = pd.DataFrame.from_csv(StringIO(buf))
-        except IndexError:
-            table = [row.split(',') for row in buf.split('\n') if len(row)>1]
-            table = [row[:-1] + [re.sub(r'\s*<br\s*[/]?>\s*$','', row[-1])] for row in table]
-            for i, row in enumerate(table):
+        table = [row.split(',') for row in buf.split('\n') if len(row)>1]
+        print(table[:2])
+        # clean up the last column (if it contains <br> tags)
+        table = [row[:-1] + [re.sub(r'\s*<br\s*[/]?>\s*$','', row[-1])] for row in table]
+        print(table[:2])
+        for i, row in enumerate(table):
+            try:
+                row[-1] = int(row[-1])
+            except:
                 try:
-                    row[-1] = int(row[-1])
+                    row[-1] = float(row[-1])
                 except:
-                    try:
-                        row[-1] = float(row[-1])
-                    except:
-                        pass
-            numcols = max(len(row) for row in table)
-            table = [row for row in table if len(row) == numcols]
-            df0 = pd.DataFrame(table)
-            df0.columns = [str(label) for label in df0.iloc[0].values]
-            df0 = df0.iloc[1:]
+                    pass
+        numcols = max(len(row) for row in table)
+        table = [row for row in table if len(row) == numcols]
+        df0 = pd.DataFrame(table)
+        df0.columns = [str(label) for label in df0.iloc[0].values]
+        df0 = df0.iloc[1:]
         df0.columns = [label.strip() for label in df0.columns]
 
         # if verbosity > 0:
@@ -80,11 +80,21 @@ def airport(location='Fresno, CA', years=1, verbosity=1):
     tzs = [s for s in df.columns if (s[1:] in ['ST', 'DT'] and s[0] in 'PMCE')]
     df['Date'] = df.index
     if len(tzs) > 0:
-        df['Date'] = [util.make_datetime(obj, tz=tzs[0]) if obj else float('nan') for obj in df[tzs[0]]]
+        print(df[tzs[0]])
+        print(sum(df[tzs[0]].isnull()))
+        for i, obj in enumerate(df[tzs[0]]):
+            try:
+                df['Date'].iloc[i] = util.make_tz_aware(obj, tz=tzs[0])
+            except:
+                from traceback import print_exc
+                print_exc()
+                df['Date'].iloc[i] = float('nan')
         if len(tzs) == 2:
+            if verbosity > 0:
+                print('Data spanned a daylight savings transition (two timezones = {}) so merging the dates...'.format(tzs))
             nanmask = df.Date.isnull()
-            df.Date[nanmask] = [util.make_datetime(obj, tz=tzs[0]) if obj else float('nan') for obj in df[tzs[1]][nanmask]]
-    df.drop_duplicates(cols=['Date'], take_last=True, inplace=True)
+            df.Date[nanmask] = [util.make_tz_aware(obj, tz=tzs[1]) if obj else float('nan') for obj in df[tzs[1]][nanmask]]
+    # df.drop_duplicates(cols=['Date'], take_last=True, inplace=True)
     if not any(df.Date.isnull()):
         df.index = pd.DatetimeIndex(df.Date)
 

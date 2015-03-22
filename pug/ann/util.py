@@ -82,7 +82,6 @@ def dataset_from_dataframe(df, delays=7, inputs=['Max TemperatureF', 'Max Humidi
     return ds
 
 
-
 def build_trainer(nn, ds, verbosity=1):
     """Configure neural net trainer from a pybrain dataset"""
     return pb.supervised.trainers.rprop.RPropMinusTrainer(nn, dataset=ds, batchlearning=True, verbose=bool(verbosity > 1))
