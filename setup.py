@@ -17,7 +17,7 @@ import os
 # #    you need to say so in your setup(kwargs) below, like this:
 # # setup(cmdclass={'test': test},...
 
-print('Installing package named {} from the {} project. . .'.format(package_name, project_name))
+print('Installing package named {} from the {} project, a sub-package/project of the namespace package {}. . .'.format(package_name, project_name, package_name))
 
 global_env, env = {}, {}
 execfile(os.path.join(__namespace_package__, __subpackage__, 'package_info.py'), global_env, env)
@@ -32,15 +32,17 @@ __url__  = env.get('__url__', 'http://github.com/hobson/')
 __authors__  = env.get('__authors__', ('Hobson <hobson@totalgood.com>',))
 try:
     import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
+    long_description = pypandoc.convert('README.md', 'rst', 'md')
 except:  # (IOError, ImportError, OSError, RuntimeError):
     # from traceback import print_exc
     # print_exc()
     print('Unable to use pypandoc to reformat the README.md file into RST format')
 
-
+print('Installing package named {} from the {} project. . .'.format(package_name, project_name))
 
 try:
+    # import pip
+    # print(pip.__version__)
     from pip.req import parse_requirements
     requirements = list(parse_requirements('requirements.txt'))
 except:

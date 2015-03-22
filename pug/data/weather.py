@@ -12,22 +12,24 @@ DATA_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # fresno = pd.DataFrame.from_csv(os.path.join(DATA_PATH, 'weather_fresno.csv'))
 
-def airport(location='Fresno, CA', years=10, verbosity=1):
+def airport(location='Fresno, CA', years=1, verbosity=1):
     this_year = datetime.date.today().year
     if isinstance(years, (int, float)):
         # current (incomplete) year doesn't count in total number of years
         # so 0 would return this calendar year's weather data
         years = np.arange(0, int(years) + 1)
+    years = sorted(years)
     if not all(1900 <= yr <= this_year for yr in years):
-        years = np.array(abs(yr) if 1900 <= abs(yr) <= this_year else this_year - abs(int(yr)) for yr in years)
+        years = np.array([abs(yr) if (1900 <= abs(yr) <= this_year) else (this_year - abs(int(yr))) for yr in years])[::-1]
 
     df = pd.DataFrame()
     for year in years:
-        url = ( 'http://www.wunderground.com/history/airport/{airport}/{yearstart}/1/1/'+
-               +'CustomHistory.html?dayend=31&monthend=12&yearend={yearend}'+
-               +'&req_city=&req_state=&req_statename=&reqdb.zip=&reqdb.magic=&reqdb.wmo=&MR=1&format=1').format(
+        url = ( 'http://www.wunderground.com/history/airport/{airport}/{yearstart}/1/1/'
+                'CustomHistory.html?dayend=31&monthend=12&yearend={yearend}'
+                '&req_city=&req_state=&req_statename=&reqdb.zip=&reqdb.magic=&reqdb.wmo=&MR=1&format=1').format(
                airport=airport.locations.get(location, location), 
-               yearstart=year)
+               yearstart=year,
+               yearend=year)
         if verbosity > 1:
             print('GETing *.CSV using "{0}"'.format(url))
         buf = urllib.urlopen(url).read()
@@ -55,7 +57,9 @@ def airport(location='Fresno, CA', years=10, verbosity=1):
 
         df = df.append(df0)
 
-    timezone = df.columns[0]
+    return df
+
+    timezone = (s for s in df.columns if s in ['PDT', 'PST', 'CDT', 'CST', 'EST', 'EDT', 'MST', 'MDT']).next()
     df.index = df[timezone]
     df = df.drop_duplicates(cols=[timezone], take_last=True)
 
