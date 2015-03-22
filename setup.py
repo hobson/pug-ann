@@ -22,7 +22,7 @@ print('Installing package named {} from the {} project, a sub-package/project of
 global_env, env = {}, {}
 execfile(os.path.join(__namespace_package__, __subpackage__, 'package_info.py'), global_env, env)
 
-print('Found pacakge info: {}'.format(env))
+print('Found package info: {}'.format(env))
 
 version = env.get('__version__', '0.0.1')
 package_docstring = env.get('__doc__', '`{}` python package'.format(project_name))
@@ -41,10 +41,12 @@ except:  # (IOError, ImportError, OSError, RuntimeError):
 print('Installing package named {} from the {} project. . .'.format(package_name, project_name))
 
 try:
-    # import pip
+    import pip
     # print(pip.__version__)
+    import uuid
+    # print(uuid.uuid1)
     from pip.req import parse_requirements
-    requirements = list(parse_requirements('requirements.txt'))
+    requirements = list(parse_requirements('requirements.txt', session=uuid.uuid1()))
 except:
     from traceback import print_exc
     print_exc()
@@ -84,7 +86,7 @@ setup(
     url = __url__,
 
     # Force setup.py to use the latest github master source files rather than the cheeseshop tarball: 
-    download_url = "{0}/tarball/master".format(__url__),
+    download_url = "{}/tarball/master".format(__url__),
     keywords = ["artificial neural network", "neural network", "pybrain", "agent", "bot", "ai", "crawl", "data", "science", "data science", "math", "machine-learning", "statistics", "database"],
     classifiers = [
         "Programming Language :: Python",

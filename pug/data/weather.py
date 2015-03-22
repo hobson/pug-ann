@@ -14,6 +14,14 @@ DATA_PATH = os.path.dirname(os.path.realpath(__file__))
 # fresno = pd.DataFrame.from_csv(os.path.join(DATA_PATH, 'weather_fresno.csv'))
 
 def airport(location='Fresno, CA', years=1, verbosity=1):
+    """Retrieve weather for the indicated airport code or 'City, ST' string.
+
+    >>> df = airport('Camas, WA', vebosity=0)
+    >>> 365 <= len(df) <= 365 * 2 + 1
+    True
+    >>> df.Date.min()
+    datetime.
+    """
     this_year = datetime.date.today().year
     if isinstance(years, (int, float)):
         # current (incomplete) year doesn't count in total number of years
