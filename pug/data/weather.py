@@ -74,50 +74,8 @@ def airport(location='Fresno, CA', years=1, verbosity=1):
                         table[i][j] = float(col)
                     except:
                         pass
-        print(len(table))
-        print(len(dates))
-
-        #all_rows += table
-        # if len(tzs) > 0:
-        #     print(tzs)
-        #     nanmask = df['Date'].isnull()
-        #     for i in range(sum(nanmask)):
-        #         obj = df[tzs[0]][nanmask].iloc[i]
-        #         df['Date'].iloc[i] = util.make_tz_aware(obj, tz=tzs[0]) if obj else float('nan')
-        #     print ('finished first')
-        #     if len(tzs) == 2:
-        #         if verbosity > 0:
-        #             print('Data spanned a daylight savings transition (two timezones = {}) so merging the dates...'.format(tzs))
-        #         nanmask = df['Date'].isnull()
-        #         for i in range(sum(nanmask)):
-        #             obj = df[tzs[1]][nanmask].iloc[i]
-        #             df['Date'].iloc[i] = util.make_tz_aware(obj, tz=tzs[1]) if obj else float('nan')
         df0 = pd.DataFrame(table, columns=columns, index=dates)
-
-        # if verbosity > 0:
-        #     print(df0.describe())
-        # columns = df0.columns.values
-        # columns[-1] = re.sub(r'<br\s*[/]?>','', columns[-1])
-        # df0.columns = columns
-
         df = df.append(df0)
-
-    # print(tzs)
-    # if len(tzs) > 0:
-    #     print(tzs)
-    #     nanmask = df['Date'].isnull()
-    #     for i in range(sum(nanmask)):
-    #         obj = df[tzs[0]][nanmask].iloc[i]
-    #         df['Date'].iloc[i] = util.make_tz_aware(obj, tz=tzs[0]) if obj else float('nan')
-    #     print ('finished first')
-    #     if len(tzs) == 2:
-    #         if verbosity > 0:
-    #             print('Data spanned a daylight savings transition (two timezones = {}) so merging the dates...'.format(tzs))
-    #         nanmask = df['Date'].isnull()
-    #         for i in range(sum(nanmask)):
-    #             obj = df[tzs[1]][nanmask].iloc[i]
-    #             df['Date'].iloc[i] = util.make_tz_aware(obj, tz=tzs[1]) if obj else float('nan')
-    # df.drop_duplicates(cols=['Date'], take_last=True, inplace=True)
 
     if verbosity > 1:
         print(df)
