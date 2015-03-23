@@ -1,6 +1,5 @@
 import os
 import urllib
-from StringIO import StringIO
 import re
 import datetime
 
@@ -19,8 +18,14 @@ def airport(location='Fresno, CA', years=1, verbosity=1):
     >>> df = airport('Camas, WA', vebosity=0)
     >>> 365 <= len(df) <= 365 * 2 + 1
     True
-    >>> df.Date.min()
-    datetime.
+
+    Sacramento data has gaps (airport KMCC), 2013 is missing 8/21/2013.
+    Whole months are missing from 2014
+    >>> df = airport('Sacramento, CA', years=[2013], verbosity=0)
+    >>> len(df)
+    364
+    >>> df.columns
+    Index([u'PST', u'Max TemperatureF', u'Mean TemperatureF', u'Min TemperatureF', u'Max Dew PointF', u'MeanDew PointF', u'Min DewpointF', u'Max Humidity', u' Mean Humidity', u' Min Humidity', u' Max Sea Level PressureIn', u' Mean Sea Level PressureIn', u' Min Sea Level PressureIn', u' Max VisibilityMiles', u' Mean VisibilityMiles', u' Min VisibilityMiles', u' Max Wind SpeedMPH', u' Mean Wind SpeedMPH', u' Max Gust SpeedMPH', u'PrecipitationIn', u' CloudCover', u' Events', u' WindDirDegrees'], dtype='object')
     """
     this_year = datetime.date.today().year
     if isinstance(years, (int, float)):

@@ -23,7 +23,7 @@ DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'dat
 
 
 def build_ann(N_input=None, N_hidden=2, N_output=1):
-    """Build a neural net with the provided parameters (p) and input dimensions (N_input)
+    """Build a neural net with the indicated input, hidden, and outout dimensions
 
     Arguments:
         params (dict or PyBrainParams namedtuple): 
@@ -63,23 +63,41 @@ def ann_from_ds(ds=None, N_input=3, N_hidden=0, N_output=1):
     return build_ann(N_input=N_input, N_hidden=N_hidden, N_output=N_output)
 
 
-def dataset_from_dataframe(df, delays=7, inputs=['Max TemperatureF', 'Max Humidity', ' Mean Humidity', ' Min Humidity'], outputs=['Max TemperatureF'], normalize=True):
+def dataset_from_dataframe(df, delays=[1,2,3], inputs=[0,1], outputs=[-1], normalize=True):
+    """Compose a pybrain.dataset from a pandas DataFrame
+
+    Arguments:
+        delays (list of int): sample delays to use for the input tapped delay line
+        inputs (list of int or list of str): column indices or labels for the inputs
+        outputs (list of int or list of str): column indices or labels for the outputs
+        normalize (bool): whether to divide each input to be normally distributed about 0 with std 1
+
+    Returns:
+        3-tuple: tuple(dataset, list of means, list of stds)
+            means and stds allow normalization of new inputs and denormalization of the outputs
+    """
+
     if isinstance(delays, int):
         delays = range(1, delays+1)
-    delays = np.array(int(i) for i in delays)
+    delays = np.array(int(i) for i in delays).abs()
     inputs = [df.columns[int(inp)] if isinstance(inp, (float, int)) else str(inp) for inp in inputs]
+    outputs = [df.columns[int(out)] if isinstance(out, (float, int)) else str(out) for out in outputs]
 
     N_inp = len(inputs) * len(delays)
     N_out = len(outputs)
 
+    inp_outs = inputs + outputs
     means, stds = np.zero0, 1
     if normalize:
-        means, stds = df[inputs].mean(), df[inputs].std()
+        means, stds = df[inp_outs].mean(), df[inp_outs].std()
 
     ds = pb.datasets.SupervisedDataSet(N_inp, N_out)
-    for sample in df[inputs + outputs].values:
+    for i, sample in enumerate(df[inputs + outputs].values[delays.max():]):
+        inp_vec = []
+        for delay in delays:
+            inp_vec += (df[inp_outs].iloc[i-delay] - means) / stds
         ds.addSample((sample[:N_inp] - means[:N_inp]) / stds[:N_inp], sample[N_inp:])
-    return ds
+    return ds, means, stds
 
 
 def build_trainer(nn, ds, verbosity=1):
