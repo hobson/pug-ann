@@ -63,7 +63,7 @@ def ann_from_ds(ds=None, N_input=3, N_hidden=0, N_output=1):
     return build_ann(N_input=N_input, N_hidden=N_hidden, N_output=N_output)
 
 
-def dataset_from_dataframe(df, delays=[1,2,3], inputs=[0,1], outputs=[-1], normalize=True):
+def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], normalize=True, verbosity=1):
     """Compose a pybrain.dataset from a pandas DataFrame
 
     Arguments:
@@ -79,30 +79,40 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[0,1], outputs=[-1], norma
 
     if isinstance(delays, int):
         delays = range(1, delays+1)
-    delays = np.array(int(i) for i in delays).abs()
+    delays = np.abs(np.array([int(i) for i in delays]))
     inputs = [df.columns[int(inp)] if isinstance(inp, (float, int)) else str(inp) for inp in inputs]
     outputs = [df.columns[int(out)] if isinstance(out, (float, int)) else str(out) for out in outputs]
 
-    N_inp = len(inputs) * len(delays)
+    N_inp = len(inputs)
     N_out = len(outputs)
 
     inp_outs = inputs + outputs
-    means, stds = np.zero0, 1
+    if verbosity > 0:
+        print("inputs: {}\noutputs: {}\ndelays: {}\n".format(inputs, outputs, delays))
+    means, stds = np.zeros(len(inp_outs)), np.ones(len(inp_outs))
     if normalize:
         means, stds = df[inp_outs].mean(), df[inp_outs].std()
 
-    ds = pb.datasets.SupervisedDataSet(N_inp, N_out)
-    for i, out_vec in enumerate(df[outputs].values[delays.max():]):
+    if verbosity > 0:
+        print("input means: {}".format(means[:N_inp]))
+    ds = pb.datasets.SupervisedDataSet(N_inp * len(delays), N_out)
+    print("Dataset dimensions are {}x{}".format(ds.indim, ds.outdim))
+    for i, out_vec in enumerate(df[outputs].values):
+        if verbosity > 1:
+            print(i, out_vec)
+        if i < max(delays):
+            continue
         inp_vec = []
         for delay in delays:
-            inp_vec += (df[inputs].iloc[i-delay] - means[:N_inp]) / stds[:N_inp]
+            inp_vec += list((df[inputs].values[i-delay] - means[:N_inp]) / stds[:N_inp])
         ds.addSample(inp_vec, (out_vec - means[N_inp:]) / stds[N_inp:])
+    print("Dataset now has {} samples".format(len(ds)))
     return ds, means, stds
 
 
 def build_trainer(nn, ds, verbosity=1):
     """Configure neural net trainer from a pybrain dataset"""
-    return pb.supervised.trainers.rprop.RPropMinusTrainer(nn, dataset=ds, batchlearning=True, verbose=bool(verbosity > 1))
+    return pb.supervised.trainers.rprop.RPropMinusTrainer(nn, dataset=ds, batchlearning=True, verbose=bool(verbosity))
 
 
 # # FIXME: resolve all these NLP dependencies and get this working
