@@ -92,11 +92,11 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[0,1], outputs=[-1], norma
         means, stds = df[inp_outs].mean(), df[inp_outs].std()
 
     ds = pb.datasets.SupervisedDataSet(N_inp, N_out)
-    for i, sample in enumerate(df[inputs + outputs].values[delays.max():]):
+    for i, out_vec in enumerate(df[outputs].values[delays.max():]):
         inp_vec = []
         for delay in delays:
-            inp_vec += (df[inp_outs].iloc[i-delay] - means) / stds
-        ds.addSample((sample[:N_inp] - means[:N_inp]) / stds[:N_inp], sample[N_inp:])
+            inp_vec += (df[inputs].iloc[i-delay] - means[:N_inp]) / stds[:N_inp]
+        ds.addSample(inp_vec, (out_vec - means[N_inp:]) / stds[N_inp:])
     return ds, means, stds
 
 
