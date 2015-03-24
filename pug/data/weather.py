@@ -54,7 +54,7 @@ def airport(location='Fresno, CA', years=1, verbosity=1):
             print('Retrieved CSV for airport code "{}" with appox. {} lines and {} columns = {} cells.'.format(
                   airport_code, N, int(round(M)), int(round(M)) * N))
 
-        table = [row.split(',') for row in buf.split('\n') if len(row)>1]
+        table = [s.strip() for s in (row.split(',') for row in buf.split('\n') if len(row)>1)]
         # clean up the last column (if it contains <br> tags)
         table = [row[:-1] + [re.sub(r'\s*<br\s*[/]?>\s*$','', row[-1])] for row in table]
         numcols = max(len(row) for row in table)
