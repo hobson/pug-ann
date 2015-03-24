@@ -28,5 +28,4 @@ Pillow==2.7
 matplotlib==1.4.3
 
 -e git+git@github.com:pybrain/pybrain.git@master#egg=pybrain-master
-
--e /home/hobs/src/pug-nlp
+-e git+git@github.com:hobson/pug-nlp.git@master#egg=pug-nlp-master
