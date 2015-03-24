@@ -27,5 +27,6 @@ Pillow==2.7
 # python-qt5==0.1.8 
 matplotlib==1.4.3
 
--e git+git@github.com:pybrain/pybrain.git@master#egg=pybrain-master
--e git+git@github.com:hobson/pug-nlp.git@master#egg=pug-nlp-master
+pybrain==0.3.0
+# -e git://github.com/pybrain/pybrain.git@master#egg=pybrain-master
+-e git://github.com/hobson/pug-nlp.git#egg=pug-nlp-master
