@@ -2,6 +2,7 @@ import os
 import urllib
 import re
 import datetime
+import json
 
 import pandas as pd
 np = pd.np
@@ -10,7 +11,33 @@ from pug.nlp import util
 DATA_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-# fresno = pd.DataFrame.from_csv(os.path.join(DATA_PATH, 'weather_fresno.csv'))
+def details(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosity=1):
+    """GEt detailed (hourly) weather data for the requested days and location
+
+    The Weather Underground URL for Sacramento, CA is:
+    http://www.wunderground.com/history/airport/KFCI/2011/1/1/DailyHistory.html?MR=1&format=1
+    """
+    airport_code = airport.locations.get(location, location)
+    if isinstance(days, int):
+        start = start or None
+        end = end or datetime.datetime.today().date()
+        days = pd.date_range(end=end, periods=days)
+
+    for day in days:
+        url = ('http://www.wunderground.com/history/airport/KFCI/{year}/{month}/{day}/DailyHistory.html?MR=1&format=1'.format(
+               year=day.year, 
+               month=day.month,
+               day=day.day))
+        if verbosity > 1:
+            print('GETing *.CSV using "{0}"'.format(url))
+        buf = urllib.urlopen(url).read()
+        if verbosity > 0:
+            N = buf.count('\n')
+            M = (buf.count(',') + N) / float(N)
+            print('Retrieved CSV for airport code "{}" with appox. {} lines and {} columns = {} cells.'.format(
+                  airport_code, N, int(round(M)), int(round(M)) * N))        
+
+
 
 def airport(location='Fresno, CA', years=1, verbosity=1):
     """Retrieve weather for the indicated airport code or 'City, ST' string.
@@ -85,6 +112,7 @@ def airport(location='Fresno, CA', years=1, verbosity=1):
     if verbosity > 1:
         print(df)
     return df
-airport.locations = dict([(str(city) + ', ' + str(region)[-2:], str(ident)) for city, region, ident in pd.DataFrame.from_csv(os.path.join(DATA_PATH, 'airports.csv')).sort(ascending=False)[['municipality', 'iso_region', 'ident']].values])
+airport.locations = json.load(open('airport.locations.json', 'rUb'))
+# airport.locations = dict([(str(city) + ', ' + str(region)[-2:], str(ident)) for city, region, ident in pd.DataFrame.from_csv(os.path.join(DATA_PATH, 'airports.csv')).sort(ascending=False)[['municipality', 'iso_region', 'ident']].values])
 
 city = airport
