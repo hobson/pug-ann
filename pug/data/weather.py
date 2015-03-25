@@ -67,6 +67,9 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
 def api(feature='conditions', city='Portland',state='OR', key=None):
     """Use the wunderground API to get current conditions instead of scraping
 
+    Please be kind and use your own key (they're FREE!):
+    http://www.wunderground.com/weather/api/d/login.html
+
     References:
         http://www.wunderground.com/weather/api/d/terms.html
 
