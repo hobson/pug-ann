@@ -23,6 +23,7 @@ def details(location='Fresno, CA', days=1, start=None, end=None, years=1, verbos
         end = end or datetime.datetime.today().date()
         days = pd.date_range(end=end, periods=days)
 
+    df = pd.DataFrame()
     for day in days:
         url = ('http://www.wunderground.com/history/airport/KFCI/{year}/{month}/{day}/DailyHistory.html?MR=1&format=1'.format(
                year=day.year, 
@@ -35,8 +36,22 @@ def details(location='Fresno, CA', days=1, start=None, end=None, years=1, verbos
             N = buf.count('\n')
             M = (buf.count(',') + N) / float(N)
             print('Retrieved CSV for airport code "{}" with appox. {} lines and {} columns = {} cells.'.format(
-                  airport_code, N, int(round(M)), int(round(M)) * N))        
-
+                  airport_code, N, int(round(M)), int(round(M)) * N))
+        table = util.read_csv(buf, format='values-list', numbers=True)
+        columns = [s.strip() for s in table[0]]
+        table = table[1:]
+        tzs = [s[4:] for s in columns if (s[5:] in ['ST', 'DT'] and s[4] in 'PMCE' and s[:4].lower() == 'time')]
+        if tzs:
+            tz = tzs[0]
+        else:
+            tz = 'UTC'
+        table = [[util.make_tz_aware(row[0], tz)] + row[1:] for row in table]
+        dates = [row[-1] for row in table]
+        if not all(isinstance(date, (datetime.datetime, pd.Timestamp)) for date in dates):
+            dates = [row[0] for row in table]
+        df0 = pd.DataFrame(table, columns=columns, index=dates)
+        df = df.append(df0)
+    return df
 
 
 def airport(location='Fresno, CA', years=1, verbosity=1):
@@ -112,7 +127,7 @@ def airport(location='Fresno, CA', years=1, verbosity=1):
     if verbosity > 1:
         print(df)
     return df
-airport.locations = json.load(open('airport.locations.json', 'rUb'))
+airport.locations = json.load(open(os.path.join(DATA_PATH, 'airport.locations.json'), 'rUb'))
 # airport.locations = dict([(str(city) + ', ' + str(region)[-2:], str(ident)) for city, region, ident in pd.DataFrame.from_csv(os.path.join(DATA_PATH, 'airports.csv')).sort(ascending=False)[['municipality', 'iso_region', 'ident']].values])
 
 city = airport
