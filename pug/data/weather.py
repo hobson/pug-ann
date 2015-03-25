@@ -1,6 +1,6 @@
 import os
 import urllib
-import re
+# import re
 import datetime
 import json
 
@@ -11,13 +11,22 @@ from pug.nlp import util
 DATA_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-def details(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosity=1):
+def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosity=1):
     """GEt detailed (hourly) weather data for the requested days and location
 
     The Weather Underground URL for Sacramento, CA is:
     http://www.wunderground.com/history/airport/KFCI/2011/1/1/DailyHistory.html?MR=1&format=1
+
+    >>> df = hourly('Los Angeles, CA', verbosity=0)
+    >>> df.columns
+    Index([u'TimeEDT', u'TemperatureF', u'Dew PointF', u'Humidity', u'Sea Level PressureIn', u'VisibilityMPH', u'Wind Direction', u'Wind SpeedMPH', u'Gust SpeedMPH', u'PrecipitationIn', u'Events', u'Conditions', u'WindDirDegrees', u'DateUTC'], dtype='object')
+    >>> 1 <= len(df) <= 24
+    True
+    >>> df = hourly('Los Angeles, CA', days=5, verbosity=0)
+    >>> 24 * 4 <= len(df) <= 24 * 5
+    True
     """
-    airport_code = airport.locations.get(location, location)
+    airport_code = daily.locations.get(location, location)
     if isinstance(days, int):
         start = start or None
         end = end or datetime.datetime.today().date()
@@ -54,20 +63,21 @@ def details(location='Fresno, CA', days=1, start=None, end=None, years=1, verbos
     return df
 
 
-def airport(location='Fresno, CA', years=1, verbosity=1):
+def daily(location='Fresno, CA', years=1, verbosity=1):
     """Retrieve weather for the indicated airport code or 'City, ST' string.
 
-    >>> df = airport('Camas, WA', vebosity=0)
+    >>> df = daily('Camas, WA', verbosity=0)
     >>> 365 <= len(df) <= 365 * 2 + 1
     True
 
-    Sacramento data has gaps (airport KMCC), 2013 is missing 8/21/2013.
-    Whole months are missing from 2014
-    >>> df = airport('Sacramento, CA', years=[2013], verbosity=0)
-    >>> len(df)
-    364
+    Sacramento data has gaps (airport KMCC):
+        8/21/2013 is missing from 2013.
+        Whole months are missing from 2014.
+    >>> df = daily('Sacramento, CA', years=[2013], verbosity=0)
+    >>> 364 <= len(df) <= 365
+    True
     >>> df.columns
-    Index([u'PST', u'Max TemperatureF', u'Mean TemperatureF', u'Min TemperatureF', u'Max Dew PointF', u'MeanDew PointF', u'Min DewpointF', u'Max Humidity', u' Mean Humidity', u' Min Humidity', u' Max Sea Level PressureIn', u' Mean Sea Level PressureIn', u' Min Sea Level PressureIn', u' Max VisibilityMiles', u' Mean VisibilityMiles', u' Min VisibilityMiles', u' Max Wind SpeedMPH', u' Mean Wind SpeedMPH', u' Max Gust SpeedMPH', u'PrecipitationIn', u' CloudCover', u' Events', u' WindDirDegrees'], dtype='object')
+    Index([u'PST', u'Max TemperatureF', u'Mean TemperatureF', u'Min TemperatureF', u'Max Dew PointF', u'MeanDew PointF', u'Min DewpointF', u'Max Humidity', u'Mean Humidity', u'Min Humidity', u'Max Sea Level PressureIn', u'Mean Sea Level PressureIn', u'Min Sea Level PressureIn', u'Max VisibilityMiles', u'Mean VisibilityMiles', u'Min VisibilityMiles', u'Max Wind SpeedMPH', u'Mean Wind SpeedMPH', u'Max Gust SpeedMPH', u'PrecipitationIn', u'CloudCover', u'Events', u'WindDirDegrees'], dtype='object')
     """
     this_year = datetime.date.today().year
     if isinstance(years, (int, float)):
@@ -78,7 +88,7 @@ def airport(location='Fresno, CA', years=1, verbosity=1):
     if not all(1900 <= yr <= this_year for yr in years):
         years = np.array([abs(yr) if (1900 <= abs(yr) <= this_year) else (this_year - abs(int(yr))) for yr in years])[::-1]
 
-    airport_code = airport.locations.get(location, location)
+    airport_code = daily.locations.get(location, location)
     df = pd.DataFrame()
     for year in years:
         url = ( 'http://www.wunderground.com/history/airport/{airport}/{yearstart}/1/1/'
@@ -96,11 +106,11 @@ def airport(location='Fresno, CA', years=1, verbosity=1):
             print('Retrieved CSV for airport code "{}" with appox. {} lines and {} columns = {} cells.'.format(
                   airport_code, N, int(round(M)), int(round(M)) * N))
 
-        table = [s.strip() for s in (row.split(',') for row in buf.split('\n') if len(row)>1)]
-        # clean up the last column (if it contains <br> tags)
-        table = [row[:-1] + [re.sub(r'\s*<br\s*[/]?>\s*$','', row[-1])] for row in table]
-        numcols = max(len(row) for row in table)
-        table = [row for row in table if len(row) == numcols]
+        table = util.read_csv(buf, format='values-list', numbers=True)
+        # # clean up the last column (if it contains <br> tags)
+        # table = [row[:-1] + [re.sub(r'\s*<br\s*[/]?>\s*$','', row[-1])] for row in table]
+        # numcols = max(len(row) for row in table)
+        # table = [row for row in table if len(row) == numcols]
         columns = table.pop(0)
         tzs = [s for s in columns if (s[1:] in ['ST', 'DT'] and s[0] in 'PMCE')]
         dates = [float('nan')] * len(table)
@@ -127,7 +137,6 @@ def airport(location='Fresno, CA', years=1, verbosity=1):
     if verbosity > 1:
         print(df)
     return df
-airport.locations = json.load(open(os.path.join(DATA_PATH, 'airport.locations.json'), 'rUb'))
+daily.locations = json.load(open(os.path.join(DATA_PATH, 'airport.locations.json'), 'rUb'))
 # airport.locations = dict([(str(city) + ', ' + str(region)[-2:], str(ident)) for city, region, ident in pd.DataFrame.from_csv(os.path.join(DATA_PATH, 'airports.csv')).sort(ascending=False)[['municipality', 'iso_region', 'ident']].values])
 
-city = airport

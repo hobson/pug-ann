@@ -14,7 +14,7 @@ from pug.data import weather
 from pug.ann import util
 
 def predict_weather(location='Camas, WA', years=range(2011, 2015), verbosity=2):
-    df = weather.city(location, years=years, verbosity=verbosity).sort()
+    df = weather.daily(location, years=years, verbosity=verbosity).sort()
     ds, means, stds = util.dataset_from_dataframe(df, delays=[1,2,3,4], inputs=['Min TemperatureF', 'Max TemperatureF', ' Min Sea Level PressureIn', u' Max Sea Level PressureIn', ' WindDirDegrees'], outputs=[u'Max TemperatureF'])
     nn = util.ann_from_ds(ds)
     trainer = util.build_trainer(nn, ds)
