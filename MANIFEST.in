@@ -5,4 +5,4 @@ include *.md
 # recursive-include . *.md
 # include *.rst
 # recursive-include . *.rst
-recursive-include pug/data *
+recursive-include pug/ann/data *

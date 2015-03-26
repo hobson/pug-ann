@@ -1,7 +1,7 @@
 
 .. code:: python
 
-    from pug.data import weather
+    from pug.ann.data import weather
     df = weather.fresno
     print(df.describe())
 

@@ -10,7 +10,7 @@ Usage:
     >>> example.predict_weather('San Francisco, CA')
 """
 
-from pug.data import weather
+from pug.ann.data import weather
 from pug.ann import util
 
 def predict_weather(location='Camas, WA', years=range(2011, 2015), verbosity=2):
