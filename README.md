@@ -1,4 +1,4 @@
-# pug-ann
+# pug-ann ![alt text](https://travis-ci.org/hobson/pug-ann.svg?branch=master "Travis Build & Test Status")
 
 ## Artificial Neural Network (ANN) utilities
 
