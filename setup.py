@@ -51,13 +51,13 @@ install_requires = [
     'pytz==2014.10', 'python-dateutil==2.4.0',
     # 'cython==0.22', 
     'pandas==0.15.2',
-    'xlrd==0.9.3', 'Pillow==2.7', 
+    'xlrd==0.9.3', 'Pillow==2.7',
     'fuzzywuzzy==0.5.0', 'python-Levenshtein==0.12.0', 'progressbar2==2.7.3', 'python-slugify==0.1.0',
     'matplotlib==1.4.3',
     #'numpy==1.9.2',
     # 'pyparsing==2.0.3', 
     # 'scipy==0.15.1',
-    'pybrain',
+    'pybrain==0.3',
     'pug-nlp', # .{}'.format(version), 
     ]
 dependency_links = []
@@ -67,7 +67,7 @@ dependency_links = []
 #     import uuid
 #     # print(uuid.uuid1)
 #     from pip.req import parse_requirements
-#     requirements = list(parse_requirements('requirements.txt', session=uuid.uuid1()))
+#     requirements = list(parse_requirements('requirements/travis.txt', session=uuid.uuid1()))
 #     install_requires=[str(req.req).split(' ')[0].strip() for req in requirements if req.req and not req.url]
 #     dependency_links=[req.url for req in requirements if req.url]
 #     print('Dependency links: {}'.format(dependency_links))
