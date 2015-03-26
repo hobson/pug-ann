@@ -84,7 +84,7 @@ EXCLUDE_FROM_PACKAGES = []
 setup(
     name=project_name,
     packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
-    namespace_packages=[__namespace_package__, package_name, package_name + '.data', package_name + '.util'],
+    namespace_packages=[__namespace_package__, package_name, package_name + '.data'],
 
     # install non-.py files listed in MANIFEST.in (.js, .html, .txt, .md, etc)
     include_package_data = True,
