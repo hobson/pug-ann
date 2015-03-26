@@ -87,7 +87,7 @@ setup(
     include_package_data = True,
     install_requires = install_requires,
     dependency_links = dependency_links,
-    scripts=['pug/bin/install_requirements'],
+    # scripts=['pug/bin/install_requirements'],
     # entry_points={'console_scripts': [
     #     'test-ann = pug.tests:main',
     # ]},
