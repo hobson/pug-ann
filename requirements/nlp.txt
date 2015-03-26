@@ -1,0 +1,26 @@
+cffi==0.8.6
+chardet==2.3.0
+future==0.14.3
+fuzzywuzzy==0.5.0
+# # ipython needs ZeroMQ
+# pyzmq==14.5.0
+# ipython[all]
+matplotlib==1.4.3
+pandas==0.15.2
+Pillow==2.7
+pip==6.0.8
+progressbar2==2.7.3
+pyOpenSSL==0.14
+pypandoc>=0.9.6
+python-dateutil==2.4.0
+python-Levenshtein==0.12.0
+python-slugify==0.1.0
+# # alternative backend for matplotlib (like tkagg)
+# python-qt5==0.1.8 
+pytz==2014.10
+six>=1.9.0
+#$ sudo yum install libjpeg-devel openjpeg-devel libpng libpng-devel 
+#$ sudo yum install pandoc
+Unidecode==0.04.16
+wsgiref==0.1.2
+xlrd==0.9.3

@@ -1,0 +1,17 @@
+language: python
+python:
+  - "2.7"
+# TODO: What about yum (rpm) or apt (deb) binaries and C code like BLAS and lapack?
+# command to install dependencies
+install:
+    - "pip install --upgrade -r requirements/travis.txt"
+    - "pip list -vvv"
+    - "pip install --upgrade -e ."
+    - "pip list -vvv"
+# shell command run tests
+script: 
+    - "python pug/nlp/tests.py"
+# build notifications
+notifications:
+  email:
+    - admin@totalgood.com
