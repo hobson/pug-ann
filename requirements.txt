@@ -14,7 +14,7 @@ chardet==2.3.0
 
 pyOpenSSL==0.14
 pytz>=2014.10
-python-dateutil==2.4.0
+python-dateutil>=2.4.1
 
 pandas>=0.16.0
 xlrd>=0.9.3
@@ -41,7 +41,7 @@ scipy==0.12.1
 
 pybrain>=0.3.0
 
-pug-nlp==0.0.14
+pug-nlp==0.0.15
 
 
 # ######################
