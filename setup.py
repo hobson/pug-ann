@@ -63,10 +63,10 @@ install_requires = [
     # 'pyparsing==2.0.3', 
     # 'scipy==0.15.1',
     'pybrain==0.3',
-    'pug-nlp==0.0.15',
+    'pug-nlp>=0.0.15',
 	# .{}'.format(version), 
     ]
-dependency_links = []  #['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master']  # ['git+https://github.com/hobson/pug-nlp.git@master']
+dependency_links = ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master']  # ['git+https://github.com/hobson/pug-nlp.git@master']
 # try:
 #     # import pip
 #     # print(pip.__version__)
