@@ -16,6 +16,9 @@ before_install:
   - ./miniconda.sh -b
   - export PATH=/home/travis/miniconda/bin:$PATH
   - conda update --yes conda
+  - conda install numpy==1.9.2
+  - conda install scipy==0.15.1
+  - conda install pyparsing==2.0.3
   - pip install -r requirements/travis.txt
   # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
   # - sudo rm -rf /dev/shm
