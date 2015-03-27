@@ -22,7 +22,7 @@ before_install:
   # - sudo rm -rf /dev/shm
   # - sudo ln -s /run/shm /dev/shm
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy=1.8.2 scipy=0.12.1 matplotlib nose dateutil pandas=0.16.0 statsmodels
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy=1.8.2 scipy=0.12.1 matplotlib nose dateutil pandas statsmodels
   # # Coverage packages are on Dan's binstar channel
   # - conda install --yes -c dan_blanchard python-coveralls nose-cov
   - pip install pug-nlp==0.0.13
