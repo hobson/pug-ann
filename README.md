@@ -1,4 +1,8 @@
-# pug-ann ![alt text](https://travis-ci.org/hobson/pug-ann.svg?branch=master "Travis Build & Test Status")
+# pug-ann 
+[![Build Status](https://travis-ci.org/hobson/pug-ann.svg?branch=master "Travis Build & Test Status")](https://travis-ci.org/hobson/pug-ann)
+[![Coverage Status](https://coveralls.io/repos/hobson/pug-ann/badge.png)](https://coveralls.io/r/hobson/pug-ann)
+[![Version Status](https://pypip.in/v/pug-ann/badge.png)](https://pypi.python.org/pypi/pug-ann/)
+[![Downloads](https://pypip.in/d/pug-ann/badge.png)](https://pypi.python.org/pypi/pug-ann/)
 
 ## Artificial Neural Network (ANN) utilities
 
