@@ -21,6 +21,6 @@ pytz==2014.10
 six>=1.9.0
 #$ sudo yum install libjpeg-devel openjpeg-devel libpng libpng-devel 
 #$ sudo yum install pandoc
-Unidecode==0.04.16
+Unidecode==0.4.16
 wsgiref==0.1.2
 xlrd==0.9.3
