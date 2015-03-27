@@ -23,6 +23,7 @@ install:
   - python setup.py install
   # - "pip install -r requirements/travis.txt"
   - "pip install ."
+  - "conda install ."
 # shell command run tests
 script: 
   - "python pug/ann/tests.py"
