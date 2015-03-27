@@ -6,6 +6,7 @@ python:
 # command to install dependencies
 before_install:
   - pip install setuptools==14.3.1
+  - pip install pip==6.0.8
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
@@ -26,8 +27,6 @@ install:
   # - "pip install -r requirements/travis.txt"
   - pip install .
   - pip freeze
-  - "conda install ."
-  - "pip freeze"
 # shell command run tests
 script: 
   - "python pug/ann/tests.py"
