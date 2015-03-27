@@ -6,8 +6,8 @@ Uses the unittest module to test this app with `manage.py test`.
 # from django.test import TestCase
 from unittest import TestCase, main
 import doctest
-from .data import weather
-import util
+from pug.ann import util
+from pug.ann.data import weather
 
 
 class ANNDocTest(TestCase):
