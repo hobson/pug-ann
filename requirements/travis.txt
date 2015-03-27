@@ -17,7 +17,7 @@ pyOpenSSL==0.14
 pytz==2014.10
 python-dateutil==2.4.0
 
-pandas==0.15.2
+pandas==0.16.0
 xlrd==0.9.3
 
 #$ sudo yum install -y libjpeg-devel openjpeg-devel libpng libpng-devel
@@ -33,9 +33,9 @@ python-slugify==0.1.0
 # pug-ann requirements
 
 # pybrain requires scipy which requires these, but doesn't install them when you do `pip install pybrain` (which fails due to failed imports)
-# numpy==1.9.2
+numpy==1.8.2
 pyparsing==2.0.3
-scipy==0.15.1
+scipy==0.12.1
 
 pybrain==0.3
 pug-nlp==0.0.13
