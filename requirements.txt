@@ -33,13 +33,15 @@ python-slugify==0.1.0
 # pug-ann requirements
 
 # pybrain requires scipy which requires these, but doesn't install them when you do `pip install pybrain` (which fails due to failed imports)
-matplotlib==1.4.3
-numpy==1.9.2
+# matplotlib==1.4.3
 pyparsing==2.0.3
-scipy==0.15.1
+# fedora 20 is at these versions, so you know the required source libs are available during pip install
+numpy==1.8.2
+scipy==0.12.1
+
+pybrain>=0.3.0
 
 pug-nlp
-pybrain>=0.3.0
 
 
 # ######################
