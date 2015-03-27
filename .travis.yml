@@ -21,10 +21,10 @@ install:
   # # Coverage packages are on Dan's binstar channel
   # - conda install --yes -c dan_blanchard python-coveralls nose-cov
   - python setup.py install
-  - "pip freeze"
+  - pip freeze
   # - "pip install -r requirements/travis.txt"
-  - "pip install ."
-  - "pip freeze"
+  - pip install .
+  - pip freeze
   - "conda install ."
   - "pip freeze"
 # shell command run tests
