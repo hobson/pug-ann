@@ -51,8 +51,9 @@ install_requires = [
     # 'pypandoc==0.8.2', 'future==0.14.3',
     'pyzmq==14.5.0', 'Unidecode==0.04.16', 'cffi==0.8.6', 'chardet==2.3.0', 'pyOpenSSL==0.14',
     'pytz==2015.2', 'python-dateutil==2.4.0',
-    # 'cython==0.22', 
-    'pandas==0.15.2',
+    # 'cython==0.22',
+    'pandas==0.16.0',
+    #'pandas==0.15.2',
     'xlrd==0.9.3', 'Pillow==2.7',
     'fuzzywuzzy==0.5.0', 'python-Levenshtein==0.12.0', 'progressbar2==2.7.3', 'python-slugify==0.1.0',
     'matplotlib==1.4.3',
@@ -62,7 +63,8 @@ install_requires = [
     # 'pyparsing==2.0.3', 
     # 'scipy==0.15.1',
     'pybrain==0.3',
-    'pug-nlp', # .{}'.format(version), 
+    # 'pug-nlp', 
+	# .{}'.format(version), 
     ]
 dependency_links = []
 # try:
