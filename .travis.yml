@@ -28,7 +28,7 @@ install:
   - pip install pug-nlp==0.0.13
   - python setup.py install
   - pip freeze
-  - pip install -r requirements/travis.txt
+  #- pip install -r requirements/travis.txt
   - pip install .
   - pip freeze
 # shell command run tests
