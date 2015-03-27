@@ -45,41 +45,31 @@ print('Installing package named {} from the {} project. . .'.format(package_name
 
 # sudo yum install libjpeg-devel openjpeg-devel
 install_requires = [
-    'wsgiref==0.1.2', 'six==1.9.0', 
+    'wsgiref==0.1.2', 
+    'six==1.9.0', 
     'setuptools==14.3.1',
-    # 'pypandoc==0.8.2', 'future==0.14.3',
-    'pyzmq==14.5.0', 'Unidecode==0.4.16', 'cffi==0.8.6', 'chardet==2.3.0', 'pyOpenSSL==0.14',
-    'pytz==2015.2', 'python-dateutil==2.4.1',
-    # 'cython==0.22',
+    'pyzmq==14.5.0', 
+    'Unidecode==0.4.16', 
+    'cffi==0.8.6', 
+    'chardet==2.3.0', 
+    'pyOpenSSL==0.14',
+    'pytz==2015.2', 
+    'python-dateutil==2.4.1',
     'pandas==0.15.2',
-    #'pandas==0.15.2',
     'xlrd==0.9.3', 'Pillow==2.7',
     'fuzzywuzzy==0.5.0', 
-    'python-Levenshtein==0.12.0', 'progressbar2==2.7.3', 'python-slugify==0.1.0',
+    'python-Levenshtein==0.12.0',
+    'progressbar2==2.7.3',
+    'python-slugify==0.1.0',
     'matplotlib==1.4.3',
     'numpy==1.9.2',
     'scipy==0.15.1',
-    #'numpy==1.9.2',
-    # 'pyparsing==2.0.3', 
-    # 'scipy==0.15.1',
     'pybrain==0.3',
-    #'pug-nlp>=0.0.15',
-	# .{}'.format(version), 
+
+    'pug-nlp>=0.0.15',
     ]
-dependency_links = ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master']  # ['git+https://github.com/hobson/pug-nlp.git@master']
-# try:
-#     # import pip
-#     # print(pip.__version__)
-#     import uuid
-#     # print(uuid.uuid1)
-#     from pip.req import parse_requirements
-#     requirements = list(parse_requirements('requirements/travis.txt', session=uuid.uuid1()))
-#     install_requires=[str(req.req).split(' ')[0].strip() for req in requirements if req.req and not req.url]
-#     dependency_links=[req.url for req in requirements if req.url]
-#     print('Dependency links: {}'.format(dependency_links))
-# except:
-#     from traceback import print_exc
-#     print_exc()
+
+dependency_links = [] #  ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master'] 
 
 EXCLUDE_FROM_PACKAGES = []
 
