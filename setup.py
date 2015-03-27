@@ -46,7 +46,7 @@ print('Installing package named {} from the {} project. . .'.format(package_name
 # sudo yum install libjpeg-devel openjpeg-devel
 install_requires = [
     'wsgiref==0.1.2', 'six==1.9.0', 
-    'setuptools==14.1',
+    'setuptools==14.3.1',
     # 'pypandoc==0.8.2', 'future==0.14.3',
     'pyzmq==14.5.0', 'Unidecode==0.04.16', 'cffi==0.8.6', 'chardet==2.3.0', 'pyOpenSSL==0.14',
     'pytz==2014.10', 'python-dateutil==2.4.0',
