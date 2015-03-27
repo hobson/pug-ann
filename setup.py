@@ -20,9 +20,12 @@ import os
 print('Installing package named {} from the {} project, a sub-package/project of the namespace package {}. . .'.format(package_name, project_name, package_name))
 
 global_env, env = {}, {}
-execfile(os.path.join(__namespace_package__, __subpackage__, 'package_info.py'), global_env, env)
-
-print('Found package info: {}'.format(env))
+package_info_path = os.path.join(__subpackage__, 'package_info.py')
+if __namespace_package__:
+    package_info_path = os.path.join(__namespace_package__, package_info_path)
+# FIXME: import this by path instead of executing it
+execfile(package_info_path, global_env, env)
+print('Found package info in {}: {}'.format(package_info_path, env))
 
 version = env.get('__version__', '0.0.1')
 package_docstring = env.get('__doc__', '`{}` python package'.format(project_name))
@@ -33,31 +36,33 @@ __authors__  = env.get('__authors__', ('Hobson <hobson@totalgood.com>',))
 try:
     long_description = open('README.rst', 'r').read()
 except:  # (IOError, ImportError, OSError, RuntimeError):
-    try:
-        import pypandoc
-        long_description = pypandoc.convert('README.md', 'rst', 'md')
-        # from traceback import print_exc
-        # print_exc()
-    except:
-        print('WARNING: Unable to find README.rst or use pypandoc to reformat the README.md file into RST.')
+    print('WARNING: Unable to find or read README.rst.')
+
+
+dependency_links = [] #  ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master'] 
+EXCLUDE_FROM_PACKAGES = []
+
 
 print('Installing package named {} from the {} project. . .'.format(package_name, project_name))
+packages = list(set([package_name] + list(find_packages(exclude=EXCLUDE_FROM_PACKAGES))))
+print('Packages being installed: {}'.format(packages))
+
 
 # sudo yum install libjpeg-devel openjpeg-devel
 install_requires = [
-    'wsgiref==0.1.2', 
-    'six==1.9.0', 
+    'wsgiref==0.1.2',
+    'six==1.9.0',
     'setuptools==14.3.1',
-    'pyzmq==14.5.0', 
-    'Unidecode==0.4.16', 
-    'cffi==0.8.6', 
-    'chardet==2.3.0', 
+    'pyzmq==14.5.0',
+    'Unidecode==0.4.16',
+    'cffi==0.8.6',
+    'chardet==2.3.0',
     'pyOpenSSL==0.14',
     'pytz==2015.2', 
     'python-dateutil==2.4.1',
     'pandas==0.15.2',
     'xlrd==0.9.3', 'Pillow==2.7',
-    'fuzzywuzzy==0.5.0', 
+    'fuzzywuzzy==0.5.0',
     'python-Levenshtein==0.12.0',
     'progressbar2==2.7.3',
     'python-slugify==0.1.0',
@@ -68,16 +73,7 @@ install_requires = [
 
     'pug-nlp>=0.0.15',
     ]
-
-dependency_links = [] #  ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master'] 
-
-EXCLUDE_FROM_PACKAGES = []
-
 print('install_requires: {}'.format(install_requires))
-
-packages = list(set([package_name] + list(find_packages(exclude=EXCLUDE_FROM_PACKAGES))))
-
-print('packages being installed: {}'.format(packages))
 
 
 setup(
