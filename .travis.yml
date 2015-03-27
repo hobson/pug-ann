@@ -22,7 +22,7 @@ install:
   # - conda install --yes -c dan_blanchard python-coveralls nose-cov
   - python setup.py install
   # - "pip install -r requirements/travis.txt"
-  # - "pip install ."
+  - "pip install ."
 # shell command run tests
 script: 
   - "python pug/ann/tests.py"
