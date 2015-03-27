@@ -1,5 +1,7 @@
-pug-ann |alt text|
-==================
+pug-ann
+=======
+
+|Build Status| |Coverage Status| |Version Status| |Downloads|
 
 Artificial Neural Network (ANN) utilities
 -----------------------------------------
@@ -74,4 +76,11 @@ I love merging PRs and adding contributors to the **authors** list:
 
     git clone https://github.com/hobson/pug-ann.git
 
-.. |alt text| image:: https://travis-ci.org/hobson/pug-ann.svg?branch=master
+.. |Build Status| image:: https://travis-ci.org/hobson/pug-ann.svg?branch=master
+   :target: https://travis-ci.org/hobson/pug-ann
+.. |Coverage Status| image:: https://coveralls.io/repos/hobson/pug-ann/badge.png
+   :target: https://coveralls.io/r/hobson/pug-ann
+.. |Version Status| image:: https://pypip.in/v/pug-ann/badge.png
+   :target: https://pypi.python.org/pypi/pug-ann/
+.. |Downloads| image:: https://pypip.in/d/pug-ann/badge.png
+   :target: https://pypi.python.org/pypi/pug-ann/
