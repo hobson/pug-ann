@@ -63,7 +63,7 @@ install_requires = [
     # 'pyparsing==2.0.3', 
     # 'scipy==0.15.1',
     'pybrain==0.3',
-    'pug-nlp>=0.0.15',
+    #'pug-nlp>=0.0.15',
 	# .{}'.format(version), 
     ]
 dependency_links = ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master']  # ['git+https://github.com/hobson/pug-nlp.git@master']
@@ -81,15 +81,18 @@ dependency_links = ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp
 #     from traceback import print_exc
 #     print_exc()
 
+EXCLUDE_FROM_PACKAGES = []
+
 print('install_requires: {}'.format(install_requires))
 
+packages = list(set([package_name] + list(find_packages(exclude=EXCLUDE_FROM_PACKAGES))))
 
+print('packages being installed: {}'.format(packages))
 
-EXCLUDE_FROM_PACKAGES = []
 
 setup(
     name=project_name,
-    packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
+    packages=packages,
     namespace_packages=[__namespace_package__],
 
     # install non-.py files listed in MANIFEST.in (.js, .html, .txt, .md, etc)
