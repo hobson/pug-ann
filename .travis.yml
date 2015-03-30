@@ -26,6 +26,7 @@ install:
   # # Coverage packages are on Dan's binstar channel
   # - conda install --yes -c dan_blanchard python-coveralls nose-cov
   - pip install git+https://github.com/hobson/pug-nlp.git@master#egg=pug-nlp-master
+  - pip install git+https://github.com/hobson/pybrain.git@master#egg=pug-nlp-master
   - python setup.py install
   - pip freeze
   #- pip install -r requirements/travis.txt
