@@ -99,7 +99,7 @@
 
 .. code:: python
 
-    nn = util.build_neural_net(ds)
+    nn = util.build_ann(ds)
     print(nn)
 
 .. parsed-literal::
