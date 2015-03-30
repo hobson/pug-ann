@@ -8,12 +8,20 @@ from __future__ import print_function
 import os
 
 import pandas as pd
+from scipy import ndarray, reshape  # array, amin, amax, 
 np = pd.np
 from matplotlib import pyplot as plt
 import pybrain.datasets
 import pybrain.structure
 import pybrain.supervised
+import pybrain.tools
 pb = pybrain
+# from pybrain.supervised.trainers import Trainer
+from pybrain.tools.customxml import NetworkReader
+from pybrain.structure.parametercontainer import ParameterContainer
+from pybrain.structure.connections.connection import Connection
+
+
 
 
 #import pug.nlp.util as nlp
@@ -115,6 +123,50 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], 
 def build_trainer(nn, ds, verbosity=1):
     """Configure neural net trainer from a pybrain dataset"""
     return pb.supervised.trainers.rprop.RPropMinusTrainer(nn, dataset=ds, batchlearning=True, verbose=bool(verbosity))
+
+
+def weight_matrices(nn):
+    """ Extract list of weight matrices from a Network, Layer (module), Trainer, Connection or other pybrain object"""
+
+    if isinstance(nn, ndarray):
+        return nn
+
+    try:
+        return weight_matrices(nn.connections)
+    except:
+        pass
+
+    try:
+        return weight_matrices(nn.module)
+    except:
+        pass
+
+    # Network objects are ParameterContainer's too, but won't reshape into a single matrix, 
+    # so this must come after try nn.connections
+    if isinstance(nn, (ParameterContainer, Connection)):
+        return reshape(nn.params, (nn.outdim, nn.indim))
+
+    if isinstance(nn, basestring):
+        try:
+            fn = nn
+            nn = NetworkReader(fn, newfile=False)
+            return weight_matrices(nn.readFrom(fn))
+        except:
+            pass
+    # FIXME: what does NetworkReader output? (Module? Layer?) need to handle it's type here
+
+    try:
+        return [weight_matrices(v) for (k, v) in nn.iteritems()]
+    except:
+        try:
+            connections = nn.module.connections.values()
+            nn = []
+            for conlist in connections:
+                nn += conlist
+            return weight_matrices(nn)
+        except:
+            return [weight_matrices(v) for v in nn]
+
 
 
 # # FIXME: resolve all these NLP dependencies and get this working
