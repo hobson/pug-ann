@@ -68,6 +68,8 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], 
 
     Arguments:
         delays (list of int): sample delays to use for the input tapped delay line
+            Positive and negative values are treated the same as sample counts into the past.
+            default: [1, 2, 3], in z-transform notation: z^-1 + z^-2 + z^-3
         inputs (list of int or list of str): column indices or labels for the inputs
         outputs (list of int or list of str): column indices or labels for the outputs
         normalize (bool): whether to divide each input to be normally distributed about 0 with std 1
