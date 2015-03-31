@@ -14,9 +14,8 @@ before_install:
   - ./miniconda.sh -b
   - export PATH=/home/travis/miniconda/bin:$PATH
   - conda update --yes conda
-  - conda install --yes pyparsing numpy pandas scipy
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose dateutil pandas Pillow statsmodels
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pyparsing atlas numpy pandas scipy matplotlib nose dateutil Pillow statsmodels
   # # Coverage packages are on Dan's binstar channel
   # - conda install --yes -c dan_blanchard python-coveralls nose-cov
   - pip install git+https://github.com/hobson/pug-nlp.git@master#egg=pug-nlp-master
