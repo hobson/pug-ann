@@ -20,6 +20,8 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
     http://www.wunderground.com/history/airport/KFCI/2011/1/1/DailyHistory.html?MR=1&format=1
 
     >>> df = hourly('Fresno, CA', verbosity=-1)
+    >>> 1 <= len(df) <= 24 * 2
+    True
 
     >> df.columns
     Index([u'TimeEDT', u'TemperatureF', u'Dew PointF', u'Humidity', u'Sea Level PressureIn', u'VisibilityMPH', u'Wind Direction', u'Wind SpeedMPH', u'Gust SpeedMPH', u'PrecipitationIn', u'Events', u'Conditions', u'WindDirDegrees', u'DateUTC'], dtype='object')
