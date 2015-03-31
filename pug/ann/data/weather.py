@@ -19,13 +19,13 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
     The Weather Underground URL for Sacramento, CA is:
     http://www.wunderground.com/history/airport/KFCI/2011/1/1/DailyHistory.html?MR=1&format=1
 
-    >>> df = hourly('Los Angeles, CA', verbosity=0)
+    >>> df = hourly('Fresno, CA', verbosity=0)
     >>> df.columns
     Index([u'TimeEDT', u'TemperatureF', u'Dew PointF', u'Humidity', u'Sea Level PressureIn', u'VisibilityMPH', u'Wind Direction', u'Wind SpeedMPH', u'Gust SpeedMPH', u'PrecipitationIn', u'Events', u'Conditions', u'WindDirDegrees', u'DateUTC'], dtype='object')
-    >>> 1 <= len(df) <= 24
+    >>> 1 <= len(df) <= 24 * 2
     True
-    >>> df = hourly('Los Angeles, CA', days=5, verbosity=0)
-    >>> 24 * 4 <= len(df) <= 24 * 5
+    >>> df = hourly('Fresno, CA', days=5, verbosity=0)
+    >>> 24 * 4 <= len(df) <= 24 * 5 * 2
     True
     """
     airport_code = daily.locations.get(location, location)
