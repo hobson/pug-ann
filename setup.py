@@ -68,7 +68,7 @@ install_requires = [
     'python-slugify==0.1.0',
     'matplotlib==1.4.3',
     'numpy==1.9.2',
-    'scipy==0.15.1',
+    'scipy>=0.15.1',
     'pybrain>=0.3.3',
 
     'pug-nlp>=0.0.15',
