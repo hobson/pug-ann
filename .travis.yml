@@ -2,30 +2,26 @@ language: python
 python:
     - 2.7
     # - 3.3
-# TODO: What about yum (rpm) or apt (deb) binaries and C code like BLAS and lapack?
-# command to install dependencies
 before_install:
-  - sudo apt-get install gfortran-4.6
-  - sudo pip install --upgrade pip
-  - sudo pip install --upgrade setuptools
-  - sudo pip install --upgrade virtualenv
+  - sudo -H apt-get install gfortran-4.6
+  - sudo -H pip install --upgrade pip
+  - sudo -H pip install --upgrade setuptools
+  - sudo -H pip install --upgrade virtualenv
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
   - export PATH=/home/travis/miniconda/bin:$PATH
   - conda update --yes conda
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION pyparsing atlas numpy pandas scipy matplotlib nose dateutil Pillow statsmodels
   # # Coverage packages are on Dan's binstar channel
   # - conda install --yes -c dan_blanchard python-coveralls nose-cov
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pyparsing atlas numpy pandas scipy matplotlib nose dateutil Pillow statsmodels
   - pip install git+https://github.com/hobson/pug-nlp.git@master#egg=pug-nlp-master
   - pip install git+https://github.com/hobson/pybrain.git@master#egg=pybrain-master
   - pip install .
   - pip freeze
-# shell command run tests
 script: 
   - "python pug/ann/tests.py"
-# build notifications
 notifications:
   email:
     - admin@totalgood.com
