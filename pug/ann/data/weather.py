@@ -3,6 +3,7 @@ import urllib
 # import re
 import datetime
 import json
+import warnings
 
 import pandas as pd
 np = pd.np
@@ -35,7 +36,8 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
 
     df = pd.DataFrame()
     for day in days:
-        url = ('http://www.wunderground.com/history/airport/KFCI/{year}/{month}/{day}/DailyHistory.html?MR=1&format=1'.format(
+        url = ('http://www.wunderground.com/history/airport/{airport_code}/{year}/{month}/{day}/DailyHistory.html?MR=1&format=1'.format(
+               airport_code=airport_code,
                year=day.year, 
                month=day.month,
                day=day.day))
@@ -47,20 +49,33 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
             M = (buf.count(',') + N) / float(N)
             print('Retrieved CSV for airport code "{}" with appox. {} lines and {} columns = {} cells.'.format(
                   airport_code, N, int(round(M)), int(round(M)) * N))
-        table = util.read_csv(buf, format='values-list', numbers=True)
-        columns = [s.strip() for s in table[0]]
-        table = table[1:]
-        tzs = [s[4:] for s in columns if (s[5:] in ['ST', 'DT'] and s[4] in 'PMCE' and s[:4].lower() == 'time')]
-        if tzs:
-            tz = tzs[0]
-        else:
-            tz = 'UTC'
-        table = [[util.make_tz_aware(row[0], tz)] + row[1:] for row in table]
-        dates = [row[-1] for row in table]
-        if not all(isinstance(date, (datetime.datetime, pd.Timestamp)) for date in dates):
-            dates = [row[0] for row in table]
-        df0 = pd.DataFrame(table, columns=columns, index=dates)
-        df = df.append(df0)
+        if (buf.count('\n') > 2) or ((buf.count('\n') > 1) and buf.split('\n')[1].count(',') > 0):  
+            table = util.read_csv(buf, format='values-list', numbers=True)
+            columns = [s.strip() for s in table[0]]
+            table = table[1:]
+            tzs = [s[4:] for s in columns if (s[5:] in ['ST', 'DT'] and s[4] in 'PMCE' and s[:4].lower() == 'time')]
+            if tzs:
+                tz = tzs[0]
+            else:
+                tz = 'UTC'
+            for rownum, row in enumerate(table):
+                try:
+                    table[rownum] = [util.make_tz_aware(row[0], tz)] + row[1:]
+                except ValueError:
+                    pass
+            dates = [row[-1] for row in table]
+            if not all(isinstance(date, (datetime.datetime, pd.Timestamp)) for date in dates):
+                dates = [row[0] for row in table]
+            if len(columns) == len(table[0]):
+                df0 = pd.DataFrame(table, columns=columns, index=dates)
+                df = df.append(df0)
+            elif verbosity >= 0:
+                msg = "The number of columns in the 1st row of the table:\n    {}\n    doesn't match the number of column labels:\n    {}\n".format(
+                    table[0], columns)
+                msg += "Wunderground.com probably can't find the airport: {}\n    or the date: {}\n    in its database.\n".format(
+                    airport_code, day)
+                msg += "Attempted a GET request using the URI:\n    {0}\n".format(url)
+                warnings.warn(msg)
     return df
 
 
