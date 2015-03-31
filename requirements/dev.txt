@@ -32,7 +32,7 @@ python-slugify==0.1.0
 ######################
 # pug-ann requirements
 pug-nlp
-pybrain>=0.3.0
+pybrain>=0.3.3
 
 
 ######################

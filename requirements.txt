@@ -39,7 +39,7 @@ pyparsing==2.0.3
 # fedora 20 is at these versions, so you know the required source libs are available during pip install
 scipy==0.12.1
 
-pybrain>=0.3.0
+pybrain>=0.3.3
 
 pug-nlp==0.0.15
 
