@@ -3,10 +3,10 @@ python:
     - 2.7
     # - 3.3
 before_install:
-  - sudo -H apt-get install gfortran-4.6
-  - sudo -H pip install --upgrade pip
-  - sudo -H pip install --upgrade setuptools
-  - sudo -H pip install --upgrade virtualenv
+  # - sudo -H apt-get install gfortran-4.6
+  # - sudo -H pip install --upgrade pip
+  # - sudo -H pip install --upgrade setuptools
+  # - sudo -H pip install --upgrade virtualenv
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
