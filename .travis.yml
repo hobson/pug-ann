@@ -9,8 +9,6 @@ before_install:
   - sudo pip install --upgrade pip
   - sudo pip install --upgrade setuptools
   - sudo pip install --upgrade virtualenv
-  - sudo apt-get install python-scipy libatlas-base-dev 
-  # - pip install setuptools==14.3.1
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
