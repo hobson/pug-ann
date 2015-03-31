@@ -23,14 +23,12 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
     >>> 1 <= len(df) <= 24 * 2
     True
 
-    >> df.columns
-    Index([u'TimeEDT', u'TemperatureF', u'Dew PointF', u'Humidity', u'Sea Level PressureIn', u'VisibilityMPH', u'Wind Direction', u'Wind SpeedMPH', u'Gust SpeedMPH', u'PrecipitationIn', u'Events', u'Conditions', u'WindDirDegrees', u'DateUTC'], dtype='object')
-    >> 1 <= len(df) <= 24 * 2
-    True
+    The time zone of the client where this is used to compose the first column label, hence the ellipsis
+    >> df.columns  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    Index([u'Time...', u'TemperatureF', u'Dew PointF', u'Humidity', u'Sea Level PressureIn', u'VisibilityMPH', u'Wind Direction', u'Wind SpeedMPH', u'Gust SpeedMPH', u'PrecipitationIn', u'Events', u'Conditions', u'WindDirDegrees', u'DateUTC'], dtype='object')
 
     >>> df = hourly('Fresno, CA', days=5, verbosity=-1)
-
-    >> 24 * 4 <= len(df) <= 24 * 5 * 2
+    >>> 24 * 4 <= len(df) <= 24 * (5 + 1) * 2
     True
     """
     airport_code = daily.locations.get(location, location)
@@ -132,14 +130,14 @@ def api(feature='conditions', city='Portland',state='OR', key=None):
 def daily(location='Fresno, CA', years=1, verbosity=1):
     """Retrieve weather for the indicated airport code or 'City, ST' string.
 
-    >>> df = daily('Camas, WA', verbosity=0)
+    >>> df = daily('Camas, WA', verbosity=-1)
     >>> 365 <= len(df) <= 365 * 2 + 1
     True
 
     Sacramento data has gaps (airport KMCC):
         8/21/2013 is missing from 2013.
         Whole months are missing from 2014.
-    >>> df = daily('Sacramento, CA', years=[2013], verbosity=0)
+    >>> df = daily('Sacramento, CA', years=[2013], verbosity=-1)
     >>> 364 <= len(df) <= 365
     True
     >>> df.columns
