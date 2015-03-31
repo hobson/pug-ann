@@ -18,6 +18,7 @@ install:
   # - conda install --yes -c dan_blanchard python-coveralls nose-cov
   - pip install git+https://github.com/hobson/pug-nlp.git@master#egg=pug-nlp-master
   - pip install git+https://github.com/hobson/pybrain.git@master#egg=pybrain-master
+  - python setup.py install
   - pip install .
   - pip freeze
 script: 
