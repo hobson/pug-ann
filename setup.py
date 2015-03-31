@@ -4,8 +4,8 @@ __namespace_package__ = 'pug'
 # the subpackage that this installer is providing that you'd import like __import__(__namespace_package__ + '.' + '__subpackage__')
 __subpackage__ = 'ann'
 # the name as it will appear in the pypi cheeseshop repositor, not the name you'd use to import it
-project_name = '{}-{}'.format(__namespace_package__, __subpackage__)
-package_name = '{}.{}'.format(__namespace_package__, __subpackage__)
+project_name = '{}'.format(__namespace_package__) + ('-' + __subpackage__ if __subpackage__ else '')
+package_name = '{}'.format(__namespace_package__) + ('.' + __subpackage__ if __subpackage__ else '')
 
 from setuptools import find_packages
 from distutils.core import setup
