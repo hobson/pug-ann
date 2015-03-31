@@ -52,7 +52,7 @@ print('Packages being installed: {}'.format(packages))
 install_requires = [
     'wsgiref==0.1.2',
     'six==1.9.0',
-    'setuptools==14.3.1',
+    'setuptools>=14.3',
     'pyzmq==14.5.0',
     'Unidecode==0.4.16',
     'cffi==0.8.6',
