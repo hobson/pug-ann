@@ -22,8 +22,6 @@ from pybrain.structure.parametercontainer import ParameterContainer
 from pybrain.structure.connections.connection import Connection
 
 
-
-
 #import pug.nlp.util as nlp
 
 # print(os.path.realpath(__file__))

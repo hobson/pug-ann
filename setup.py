@@ -98,7 +98,8 @@ setup(
     #tests_require = ['django-setuptest', 'south'],
     #test_suite = 'setuptest.setuptest.SetupTestSuite',
     #cmdclass = {'test': test},
-    url = __url__,
+    # this would install the master branch
+    # url = __url__,
 
     # Force setup.py to use the latest github master source files rather than the cheeseshop tarball: 
     download_url = "{}/tarball/master".format(__url__),
