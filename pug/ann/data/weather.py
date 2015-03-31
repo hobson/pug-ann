@@ -35,9 +35,11 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
         end = end or datetime.datetime.today().date()
         days = pd.date_range(end=end, periods=days)
 
-    cache_filename = 'hourly-{}-{}-{:02d}-{:04d}.csv'.format(airport_code, days[-1].year, days[-1].month, len(days))
+    # refresh the cache each calendar month or each change in the number of days in the dataset
+    cache_path = 'hourly-{}-{}-{:02d}-{:04d}.csv'.format(airport_code, days[-1].year, days[-1].month, len(days))
+    cache_path = os.path.join(DATA_PATH, 'cache', cache_path)
     try:
-        return pd.DataFrame.from_csv(cache_filename)
+        return pd.DataFrame.from_csv(cache_path)
     except:
         pass
 
@@ -83,7 +85,7 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
                     airport_code, day)
                 msg += "Attempted a GET request using the URI:\n    {0}\n".format(url)
                 warnings.warn(msg)
-    df.to_csv(cache_filename)
+    df.to_csv(cache_path)
     return df
 
 
