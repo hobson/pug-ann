@@ -29,10 +29,17 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
     True
     """
     airport_code = daily.locations.get(location, location)
+
     if isinstance(days, int):
         start = start or None
         end = end or datetime.datetime.today().date()
         days = pd.date_range(end=end, periods=days)
+
+    cache_filename = 'hourly-{}-{}-{:02d}-{:04d}.csv'.format(airport_code, days[-1].year, days[-1].month, len(days))
+    try:
+        return pd.DataFrame.from_csv(cache_filename)
+    except:
+        pass
 
     df = pd.DataFrame()
     for day in days:
@@ -76,6 +83,7 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
                     airport_code, day)
                 msg += "Attempted a GET request using the URI:\n    {0}\n".format(url)
                 warnings.warn(msg)
+    df.to_csv(cache_filename)
     return df
 
 

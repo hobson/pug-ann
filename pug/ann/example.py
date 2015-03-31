@@ -52,5 +52,39 @@ def predict_weather(
     training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
     return trainer
 
+
+def thermostat(
+    location='Camas, WA',
+    days=100,
+    capacity=1000,  
+    ):
+    """ Control the thermostat on an AirCon system with finite thermal energy capacity (chiller)
+
+    Useful for controlling a chiller (something that can cool down overnight and heat up during the
+    hottest part of the day (in order to cool the building).
+
+    Builds a linear single-layer neural net (multi-dimensional regression).
+    The dataset is a basic SupervisedDataSet rather than a SequentialDataSet, so there may be
+    "accuracy left on the table" or even "cheating" during training, because training and test
+    set are selected randomly so historical data for one sample is used as target (furture data)
+    for other samples.
+
+    Uses CSVs scraped from wunderground (no api key required) to get daily weather for the years indicated.
+
+    Arguments:
+        location (str): City and state in standard US postal service format: "City, ST" or an airport code like "PDX"
+        days (int): Number of days of weather data to download from wunderground
+        delays (list of int): sample delays to use for the input tapped delay line.
+            Positive and negative values are treated the same as sample counts into the past.
+            default: [1, 2, 3], in z-transform notation: z^-1 + z^-2 + z^-3
+        years (int or list of int): list of 4-digit years to download weather from wunderground
+        inputs (list of int or list of str): column indices or labels for the inputs
+        outputs (list of int or list of str): column indices or labels for the outputs
+
+    Returns:
+        3-tuple: tuple(dataset, list of means, list of stds)
+            means and stds allow normalization of new inputs and denormalization of the outputs
+
+    """
 if __name__ == '__main__':
     print(predict_weather())
