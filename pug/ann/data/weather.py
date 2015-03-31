@@ -155,6 +155,15 @@ def daily(location='Fresno, CA', years=1, verbosity=1):
         years = np.array([abs(yr) if (1900 <= abs(yr) <= this_year) else (this_year - abs(int(yr))) for yr in years])[::-1]
 
     airport_code = daily.locations.get(location, location)
+
+    # refresh the cache each time the start or end year changes
+    cache_path = 'daily-{}-{}-{}.csv'.format(airport_code, years[0], years[-1])
+    cache_path = os.path.join(DATA_PATH, 'cache', cache_path)
+    try:
+        return pd.DataFrame.from_csv(cache_path)
+    except:
+        pass
+
     df = pd.DataFrame()
     for year in years:
         url = ( 'http://www.wunderground.com/history/airport/{airport}/{yearstart}/1/1/'
@@ -202,6 +211,7 @@ def daily(location='Fresno, CA', years=1, verbosity=1):
 
     if verbosity > 1:
         print(df)
+    df.to_csv(cache_path)
     return df
 daily.locations = json.load(open(os.path.join(DATA_PATH, 'airport.locations.json'), 'rUb'))
 # airport.locations = dict([(str(city) + ', ' + str(region)[-2:], str(ident)) for city, region, ident in pd.DataFrame.from_csv(os.path.join(DATA_PATH, 'airports.csv')).sort(ascending=False)[['municipality', 'iso_region', 'ident']].values])
