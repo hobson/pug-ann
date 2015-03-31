@@ -15,7 +15,7 @@ before_install:
 install:
   # # Coverage packages are on Dan's binstar channel
   # - conda install --yes -c dan_blanchard python-coveralls nose-cov
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION pyparsing atlas numpy pandas scipy matplotlib nose dateutil Pillow statsmodels
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pyparsing atlas numpy scipy matplotlib dateutil Pillow statsmodels
   - pip install git+https://github.com/hobson/pug-nlp.git@master#egg=pug-nlp-master
   - pip install git+https://github.com/hobson/pybrain.git@master#egg=pybrain-master
   - pip install .
