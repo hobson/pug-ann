@@ -22,10 +22,12 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
     >>> df = hourly('Fresno, CA', verbosity=0)
     >>> df.columns
     Index([u'TimeEDT', u'TemperatureF', u'Dew PointF', u'Humidity', u'Sea Level PressureIn', u'VisibilityMPH', u'Wind Direction', u'Wind SpeedMPH', u'Gust SpeedMPH', u'PrecipitationIn', u'Events', u'Conditions', u'WindDirDegrees', u'DateUTC'], dtype='object')
-    >>> 1 <= len(df) <= 24 * 2
+
+    >> 1 <= len(df) <= 24 * 2
     True
     >>> df = hourly('Fresno, CA', days=5, verbosity=0)
-    >>> 24 * 4 <= len(df) <= 24 * 5 * 2
+
+    >> 24 * 4 <= len(df) <= 24 * 5 * 2
     True
     """
     airport_code = daily.locations.get(location, location)
