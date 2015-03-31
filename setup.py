@@ -60,7 +60,7 @@ install_requires = [
     'pyOpenSSL==0.14',
     'pytz==2015.2', 
     'python-dateutil==2.4.1',
-    'pandas==0.15.2',
+    'pandas>=0.15.2',
     'xlrd==0.9.3', 'Pillow==2.7',
     'fuzzywuzzy==0.5.0',
     'python-Levenshtein==0.12.0',
@@ -98,7 +98,7 @@ setup(
     #tests_require = ['django-setuptest', 'south'],
     #test_suite = 'setuptest.setuptest.SetupTestSuite',
     #cmdclass = {'test': test},
-    # this would install the master branch
+    # this would install the master branch from github
     # url = __url__,
 
     # Force setup.py to use the latest github master source files rather than the cheeseshop tarball: 
