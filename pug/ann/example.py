@@ -6,8 +6,7 @@ Installation:
 
 Usage:
 
-    >>> from pug.ann import example
-    >>> trainer = example.predict_weather('San Francisco, CA', epochs=2, years=1, delays=[1,2], verbosity=0)
+    >> trainer = predict_weather('San Francisco, CA', epochs=2, years=1, delays=[1,2], verbosity=0)
 """
 
 from pug.ann.data import weather
