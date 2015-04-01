@@ -60,7 +60,7 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', 
 
     hidden_layer_type = hidden_layer_type or tuple()
     hidden_layer_type = normalize_layer_type(hidden_layer_type)
-    if isinstance(hidden_layer_type, pb.structure.NeuronLayer):
+    if hidden_layer_type in LAYER_TYPES:
         hidden_layer_type = (hidden_layer_type,)
 
     nn = pb.structure.FeedForwardNetwork()
@@ -70,8 +70,6 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', 
     nn.addInputModule(pb.structure.LinearLayer(N_input, name='input'))
     for i, (Nhid, hidlaytype) in enumerate(zip(N_hidden, hidden_layer_type)):
         Nhid = int(Nhid)
-        if isinstance(hidlaytype, basestring):
-            hidlaytype = getattr(pb.structure, hidlaytype)
         nn.addModule(hidlaytype(Nhid, name=('hidden-{}'.format(i) if i else 'hidden')))
     nn.addOutputModule(pb.structure.LinearLayer(N_output, name='output'))
 
