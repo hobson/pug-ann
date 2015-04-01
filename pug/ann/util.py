@@ -28,7 +28,20 @@ from pybrain.structure.connections.connection import Connection
 DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
 
-def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type=pb.structure.LinearLayer, verbosity=1):
+def normalize_layer_type(layer_type):
+    if isinstance(layer_type, pb.structure.NeuronLayer):
+        return layer_type
+    try:
+        return getattr(pb.structure, layer_type.strip())
+    except:
+        try:
+            return getattr(pb.structure, layer_type.strip()+'Layer')
+        except:
+            pass
+    return [normalize_layer_type(lt) for lt in layer_type]
+
+
+def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', verbosity=1):
     """Build a neural net with the indicated input, hidden, and outout dimensions
 
     Arguments:
@@ -41,37 +54,34 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type=pb.structu
     """
     N_input = N_input or 1
     N_output = N_output or 1
+    N_hidden = N_hidden or tuple()
+    if isinstance(N_hidden, (int, float, basestring)):
+        N_hidden = (int(N_hidden),)
+
+    hidden_layer_type = hidden_layer_type or tuple()
+    hidden_layer_type = normalize_layer_type(hidden_layer_type)
+    if isinstance(hidden_layer_type, pb.structure.NeuronLayer):
+        hidden_layer_type = (hidden_layer_type,)
 
     nn = pb.structure.FeedForwardNetwork()
 
     # layers
     nn.addInputModule(pb.structure.BiasUnit(name='bias'))
     nn.addInputModule(pb.structure.LinearLayer(N_input, name='input'))
-    try:
-        for i, (Nhid, hidlaytype) in enumerate(zip(N_hidden, hidden_layer_type)):
-            Nhid = int(Nhid)
-            if isinstance(hidlaytype, basestring):
-                hidlaytype = getattr(pb.structure, hidlaytype)
-            nn.addModule(hidlaytype(Nhid, name=('hidden-{}'.format(i) if i else 'hidden')))
-    except:
-        N_hidden = int(N_hidden)
-        if isinstance(hidden_layer_type, basestring):
-            hidden_layer_type = getattr(pb.structure, hidlaytype)
-        if N_hidden:
-            nn.addModule(hidden_layer_type(N_hidden, name='hidden'))
+    for i, (Nhid, hidlaytype) in enumerate(zip(N_hidden, hidden_layer_type)):
+        Nhid = int(Nhid)
+        if isinstance(hidlaytype, basestring):
+            hidlaytype = getattr(pb.structure, hidlaytype)
+        nn.addModule(hidlaytype(Nhid, name=('hidden-{}'.format(i) if i else 'hidden')))
     nn.addOutputModule(pb.structure.LinearLayer(N_output, name='output'))
 
     # connections
     nn.addConnection(pb.structure.FullConnection(nn['bias'],  nn['hidden'] if N_hidden else nn['output']))
     nn.addConnection(pb.structure.FullConnection(nn['input'], nn['hidden'] if N_hidden else nn['output']))
-    try:
-        for i, (Nhid, hidlaytype) in enumerate(zip(N_hidden[:-1], hidden_layer_type[:-1])):
-            Nhid = int(Nhid)
-            nn.addConnection(pb.structure.FullConnection(nn[('hidden-{}'.format(i) if i else 'hidden')], nn['hidden-{}'.format(i+1)]))
-        nn.addConnection(pb.structure.FullConnection(nn['hidden-{}'.format(len(N_hidden)-1)], nn['output']))
-    except:
-        if N_hidden:
-            nn.addConnection(pb.structure.FullConnection(nn['hidden'], nn['output']))
+    for i, (Nhid, hidlaytype) in enumerate(zip(N_hidden[:-1], hidden_layer_type[:-1])):
+        Nhid = int(Nhid)
+        nn.addConnection(pb.structure.FullConnection(nn[('hidden-{}'.format(i) if i else 'hidden')], nn['hidden-{}'.format(i+1)]))
+    nn.addConnection(pb.structure.FullConnection(nn['hidden-{}'.format(len(N_hidden)-1)], nn['output']))
 
     nn.sortModules()
     if verbosity > 0:
