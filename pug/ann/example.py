@@ -47,7 +47,7 @@ def predict_weather(
     """
     df = weather.daily(location, years=years, verbosity=verbosity).sort()
     ds, means, stds = util.dataset_from_dataframe(df, delays=delays, inputs=inputs, outputs=outputs, verbosity=verbosity)
-    nn = util.ann_from_ds(ds)
+    nn = util.ann_from_ds(ds, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds, verbosity=verbosity)
     training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
     return trainer

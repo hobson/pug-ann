@@ -84,7 +84,8 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', 
     for i, (Nhid, hidlaytype) in enumerate(zip(N_hidden[:-1], hidden_layer_type[:-1])):
         Nhid = int(Nhid)
         nn.addConnection(pb.structure.FullConnection(nn[('hidden-{}'.format(i) if i else 'hidden')], nn['hidden-{}'.format(i+1)]))
-    nn.addConnection(pb.structure.FullConnection(nn['hidden-{}'.format(len(N_hidden)-1)], nn['output']))
+    i = len(N_hidden)-1
+    nn.addConnection(pb.structure.FullConnection(nn['hidden-{}'.format(i) if i else 'hidden'], nn['output']))
 
     nn.sortModules()
     if verbosity > 0:
@@ -93,12 +94,12 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', 
     return nn
 
 
-def ann_from_ds(ds=None, N_input=3, N_hidden=0, N_output=1):
+def ann_from_ds(ds=None, N_input=3, N_hidden=0, N_output=1, verbosity=1):
     N_input = getattr(ds, 'indim', N_input)
     N_output = getattr(ds, 'outdim', N_output)
     N_hidden = getattr(ds, 'paramdim', N_hidden + N_input + N_output) - N_hidden - N_output
 
-    return build_ann(N_input=N_input, N_hidden=N_hidden, N_output=N_output)
+    return build_ann(N_input=N_input, N_hidden=N_hidden, N_output=N_output, verbosity=verbosity)
 
 
 def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], normalize=True, verbosity=1):
@@ -136,7 +137,8 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], 
     if verbosity > 0:
         print("input means: {}".format(means[:N_inp]))
     ds = pb.datasets.SupervisedDataSet(N_inp * len(delays), N_out)
-    print("Dataset dimensions are {}x{}".format(ds.indim, ds.outdim))
+    if verbosity > 0:
+        print("Dataset dimensions are {}x{}".format(ds.indim, ds.outdim))
     for i, out_vec in enumerate(df[outputs].values):
         if verbosity > 1:
             print(i, out_vec)
@@ -146,7 +148,8 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], 
         for delay in delays:
             inp_vec += list((df[inputs].values[i-delay] - means[:N_inp]) / stds[:N_inp])
         ds.addSample(inp_vec, (out_vec - means[N_inp:]) / stds[N_inp:])
-    print("Dataset now has {} samples".format(len(ds)))
+    if verbosity > 0:
+        print("Dataset now has {} samples".format(len(ds)))
     return ds, means, stds
 
 
