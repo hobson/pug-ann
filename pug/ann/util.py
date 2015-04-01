@@ -26,10 +26,10 @@ from pybrain.structure.connections.connection import Connection
 
 # print(os.path.realpath(__file__))
 DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
-
+LAYER_TYPES = set([getattr(pybrain.structure, s) for s in dir(pybrain.structure) if s.endswith('Layer')])
 
 def normalize_layer_type(layer_type):
-    if isinstance(layer_type, pb.structure.NeuronLayer):
+    if layer_type in LAYER_TYPES:
         return layer_type
     try:
         return getattr(pb.structure, layer_type.strip())
