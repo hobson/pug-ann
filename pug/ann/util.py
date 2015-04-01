@@ -28,7 +28,7 @@ from pybrain.structure.connections.connection import Connection
 DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 
 
-def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type=pb.structure.LinearLayer):
+def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type=pb.structure.LinearLayer, verbosity=1):
     """Build a neural net with the indicated input, hidden, and outout dimensions
 
     Arguments:
@@ -74,6 +74,9 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type=pb.structu
             nn.addConnection(pb.structure.FullConnection(nn['hidden'], nn['output']))
 
     nn.sortModules()
+    if verbosity > 0:
+        print(nn)
+        print(nn.connections)
     return nn
 
 
