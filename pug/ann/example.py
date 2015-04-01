@@ -90,7 +90,7 @@ def thermostat(
 
 
 def maze():
-    from scipy import *
+    from scipy import array
     # import sys, time
     from pybrain.rl.environments.mazes import Maze, MDPMazeTask
     from pybrain.rl.learners.valuebased import ActionValueTable
