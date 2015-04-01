@@ -86,5 +86,49 @@ def thermostat(
             means and stds allow normalization of new inputs and denormalization of the outputs
 
     """
+    pass
+
+
+def maze():
+    from scipy import *
+    # import sys, time
+    from pybrain.rl.environments.mazes import Maze, MDPMazeTask
+    from pybrain.rl.learners.valuebased import ActionValueTable
+    from pybrain.rl.agents import LearningAgent
+    from pybrain.rl.learners import Q # , SARSA
+    from pybrain.rl.experiments import Experiment
+    # from pybrain.rl.environments import Task
+    import pylab
+    pylab.gray()
+    pylab.ion()
+    # The goal appears to be in the upper right
+    structure = array([[1, 1, 1, 1, 1, 1, 1, 1, 1],
+                       [1, 0, 0, 1, 0, 0, 0, 0, 1],
+                       [1, 0, 0, 1, 0, 0, 1, 0, 1],
+                       [1, 0, 0, 1, 0, 0, 1, 0, 1],
+                       [1, 0, 0, 1, 0, 1, 1, 0, 1],
+                       [1, 0, 0, 0, 0, 0, 1, 0, 1],
+                       [1, 1, 1, 1, 1, 1, 1, 0, 1],
+                       [1, 0, 0, 0, 0, 0, 0, 0, 1],
+                       [1, 1, 1, 1, 1, 1, 1, 1, 1]])
+    environment = Maze(structure, (7, 7))
+    controller = ActionValueTable(81, 4)
+    controller.initialize(1.)
+    learner = Q()
+    agent = LearningAgent(controller, learner)
+    task = MDPMazeTask(environment)
+    experiment = Experiment(task, agent)
+
+    for i in range(100):
+        experiment.doInteractions(100)
+        agent.learn()
+        agent.reset()
+        # 4 actions, 81 locations/states (9x9 grid)
+        # max(1) gives/plots the biggest objective function value for that square
+        pylab.pcolor(controller.params.reshape(81,4).max(1).reshape(9,9))
+        pylab.draw()
+        # pylab.show()
+
+
 if __name__ == '__main__':
     print(predict_weather())
