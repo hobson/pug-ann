@@ -6,11 +6,11 @@ Uses the unittest module to test this app with `manage.py test`.
 # from django.test import TestCase
 from unittest import TestCase, main
 import doctest
-# import pip
-# installed_packages = pip.get_installed_distributions()
-# installed_packages_list = sorted(["%s==%s" % (i.key, i.version) for i in installed_packages])
-# print('Avaialble packages for import!!!!!!!!!')
-# print(installed_packages_list)
+import pip
+installed_packages = pip.get_installed_distributions()
+installed_packages_list = sorted(["%s==%s" % (i.key, i.version) for i in installed_packages])
+print('Avaialble packages for import!!!!!!!!!')
+print(installed_packages_list)
 from pug.ann import util
 from pug.ann.data import weather
 from pug.ann import example
