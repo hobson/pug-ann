@@ -63,6 +63,11 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', 
     if hidden_layer_type in LAYER_TYPES:
         hidden_layer_type = (hidden_layer_type,)
 
+    if verbosity:
+        print(N_hidden)
+        print(hidden_layer_type)
+
+    assert(len(N_hidden) == len(hidden_layer_type))
     nn = pb.structure.FeedForwardNetwork()
 
     # layers
