@@ -218,10 +218,9 @@ def run_competition(builders=[], task=BalanceTask(), Optimizer=HillClimber, roun
     if verbosity > -1:
         print('Mean Performance:')
         print(means)
-        print('And the winner for speed is...')
-        print(np.argmin(means[1]))
-        print('And the winner for performance is...')
-        print(np.argmax(means[0]))
+        perfi, speedi = np.argmax(means[0]), np.argmin(means[1])
+        print('And the winner for performance is ... Algorithm #{} (0-offset array index [{}])'.format(perfi+1, perfi))
+        print('And the winner for speed is ...       Algorithm #{} (0-offset array index [{}])'.format(speedi+1,speedi))
 
 
     return results, means
@@ -268,6 +267,8 @@ def maze():
         pylab.draw()
         # pylab.show()
 
+import sys
 
 if __name__ == '__main__':
     print(run_competition(verbosity=0))
+    sys.exit(0)
