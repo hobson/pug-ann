@@ -14,6 +14,11 @@ DATA_PATH = os.path.dirname(os.path.realpath(__file__))
 CACHE_PATH = os.path.join(DATA_PATH, 'cache')
 
 
+def airport(location, default=None):
+    return airport.locations.get(location, default)
+airport.locations = json.load(open(os.path.join(CACHE_PATH, 'airport.locations.json'), 'rUb'))
+
+
 def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosity=1):
     """GEt detailed (hourly) weather data for the requested days and location
 
@@ -32,7 +37,7 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
     >> 24 * 4 <= len(df) <= 24 * (5 + 1) * 2
     True
     """
-    airport_code = daily.locations.get(location, location)
+    airport_code = airport(location, default=location)
 
     if isinstance(days, int):
         start = start or None
@@ -153,7 +158,7 @@ def daily(location='Fresno, CA', years=1, verbosity=1):
     if not all(1900 <= yr <= this_year for yr in years):
         years = np.array([abs(yr) if (1900 <= abs(yr) <= this_year) else (this_year - abs(int(yr))) for yr in years])[::-1]
 
-    airport_code = daily.locations.get(location, location)
+    airport_code = airport(location, default=location)
 
     # refresh the cache each time the start or end year changes
     cache_path = 'daily-{}-{}-{}.csv'.format(airport_code, years[0], years[-1])
@@ -212,6 +217,5 @@ def daily(location='Fresno, CA', years=1, verbosity=1):
         print(df)
     df.to_csv(cache_path)
     return df
-daily.locations = json.load(open(os.path.join(CACHE_PATH, 'airport.locations.json'), 'rUb'))
-# airport.locations = dict([(str(city) + ', ' + str(region)[-2:], str(ident)) for city, region, ident in pd.DataFrame.from_csv(os.path.join(DATA_PATH, 'airports.csv')).sort(ascending=False)[['municipality', 'iso_region', 'ident']].values])
+# airport.locations = dict([(str(city) + ', ' + str(region)[-2:], str(ident)) for city, region, ident in pd.DataFrame.from_csv(os.path.join(CACHE_PATH, 'airports.csv')).sort(ascending=False)[['municipality', 'iso_region', 'ident']].values])
 
