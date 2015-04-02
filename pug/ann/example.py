@@ -102,7 +102,13 @@ def thermostat(
     pass
 
 
-def compete_carts(attempts=100, max_eval=1000, N_hidden=6, verbosity=0):
+from pybrain.rl.environments.cartpole.balancetask import BalanceTask
+from pybrain.tools.shortcuts import buildNetwork, NetworkError
+from pybrain.optimization.hillclimber import HillClimber
+import time
+import numpy as np
+
+def compete_carts(builders=[], task=BalanceTask(), Optimizer=HillClimber, attempts=100, max_eval=1000, N_hidden=6, verbosity=0):
     """ pybrain buildNetwork builds a subtly different network than build_ann... so compete them!
 
     buildNetwork connects the bias to the output
@@ -115,25 +121,29 @@ def compete_carts(attempts=100, max_eval=1000, N_hidden=6, verbosity=0):
     and has an average performance metric that is about 20 "points" greater (out of 2000)
     """
     results = []
-    for attempt in range(attempts):
-        import pybrain.rl.environments.cartpole.balancetask
-        nn_task = pybrain.rl.environments.cartpole.balancetask.BalanceTask()
-        # controller
-        nn = util.build_ann(nn_task.outdim, N_hidden, nn_task.indim, verbosity=verbosity)
-        net_task = pybrain.rl.environments.cartpole.balancetask.BalanceTask()
-        import pybrain.tools.shortcuts
-        net = pybrain.tools.shortcuts.buildNetwork(net_task.outdim, N_hidden, net_task.indim)
-        import pybrain.optimization.hillclimber
-        net_optimizer = pybrain.optimization.hillclimber.HillClimber(net_task, net, maxEvaluations=max_eval)
-        nn_optimizer = pybrain.optimization.hillclimber.HillClimber(nn_task, nn, maxEvaluations=max_eval)
-        nn, nn_best = nn_optimizer.learn()
-        net_optimizer, net_best = net_optimizer.learn()
-        results += [(nn, nn_best, net, net_best)]
-        if verbosity >= 0:
-            print(results[-1][1], results[-1][3])
-            print(sum((a[1]-a[3]) for a in results) / float(len(results)))
-            print(sum((a[1]>a[3]) for a in results) / float(len(results)))
+    builders = list(builders) + [buildNetwork, util.build_ann]
 
+    for attempt in range(attempts):
+        heat = []
+
+        # FIXME: shuffle the order of the builders to keep things fair 
+        #        (like switching sides of the tennis court)
+        for builder in builders:
+            try:
+                competitor = builder(task.outdim, N_hidden, task.indim, verbosity=verbosity)
+            except NetworkError:
+                competitor = builder(task.outdim, N_hidden, task.indim)
+
+            # TODO: verify that a full reset is actually happening
+            task.reset()
+            optimizer = Optimizer(task, competitor, maxEvaluations=max_eval)
+            t0 = time.time()
+            nn, nn_best = optimizer.learn()
+            t1 = time.time()
+            heat += [(nn_best, t1-t0, nn)]
+        results += [tuple(heat)]
+        if verbosity >= 0:
+            print([h[:2] for h in heat])
 
 
     # # alternatively:
@@ -142,6 +152,9 @@ def compete_carts(attempts=100, max_eval=1000, N_hidden=6, verbosity=0):
     #           pybrain.rl.agents.LearningAgent(net, pybrain.rl.learners.ENAC()) )
     # exp = pybrain.rl.experiments.EpisodicExperiment(task, agent).doEpisodes(100)
 
+    print('Mean Performance:')
+    for j in range(2):
+        print([np.array([r[i][j] for r in results]).mean() for i in range(len(results[0]))])
     return results
 
 
