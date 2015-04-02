@@ -21,6 +21,7 @@ from pybrain.tools.customxml import NetworkReader
 from pybrain.structure.parametercontainer import ParameterContainer
 from pybrain.structure.connections.connection import Connection
 
+from pug.nlp.util import tuplify
 
 #import pug.nlp.util as nlp
 
@@ -28,15 +29,19 @@ from pybrain.structure.connections.connection import Connection
 DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
 LAYER_TYPES = set([getattr(pybrain.structure, s) for s in dir(pybrain.structure) if s.endswith('Layer')])
 
+
 def normalize_layer_type(layer_type):
-    if layer_type in LAYER_TYPES:
-        return layer_type
+    try:
+        if layer_type in LAYER_TYPES:
+            return layer_type
+    except TypeError:
+        pass
     try:
         return getattr(pb.structure, layer_type.strip())
-    except:
+    except AttributeError:
         try:
             return getattr(pb.structure, layer_type.strip()+'Layer')
-        except:
+        except AttributeError:
             pass
     return [normalize_layer_type(lt) for lt in layer_type]
 
@@ -59,9 +64,7 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', 
         N_hidden = (int(N_hidden),)
 
     hidden_layer_type = hidden_layer_type or tuple()
-    hidden_layer_type = normalize_layer_type(hidden_layer_type)
-    if hidden_layer_type in LAYER_TYPES:
-        hidden_layer_type = (hidden_layer_type,)
+    hidden_layer_type = tuplify(normalize_layer_type(hidden_layer_type))
 
     if verbosity:
         print(N_hidden)
