@@ -68,7 +68,8 @@ def predict_weather(
 def thermostat(
     location='Camas, WA',
     days=100,
-    capacity=1000,  
+    capacity=1000,
+    max_eval=1000,  
     ):
     """ Control the thermostat on an AirCon system with finite thermal energy capacity (chiller)
 
@@ -98,12 +99,42 @@ def thermostat(
             means and stds allow normalization of new inputs and denormalization of the outputs
 
     """
-    import pybrain.rl.environments.cartpole.balancetask
-    task = pybrain.rl.environments.cartpole.balancetask.BalanceTask()
-    # controller
-    nn = util.build_ann(task.outdim, 3, task.indim)
-    import pybrain.optimization.hillclimber
-    optimizer = pybrain.optimization.hillclimber.HillClimber(task, nn, maxEvaluations=100).learn()
+    pass
+
+
+def compete_carts(attempts=100, max_eval=1000, N_hidden=6, verbosity=0):
+    """ pybrain buildNetwork builds a subtly different network than build_ann... so compete them!
+
+    buildNetwork connects the bias to the output
+    build_ann does not
+
+    build_ann allows heterogeneous layer types but the output layer is always linear
+    buildNetwork allows specification of the output layer type
+
+    build_network performs better 65% of the time
+    and has an average performance metric that is about 20 "points" greater (out of 2000)
+    """
+    results = []
+    for attempt in range(attempts):
+        import pybrain.rl.environments.cartpole.balancetask
+        nn_task = pybrain.rl.environments.cartpole.balancetask.BalanceTask()
+        # controller
+        nn = util.build_ann(nn_task.outdim, N_hidden, nn_task.indim, verbosity=verbosity)
+        net_task = pybrain.rl.environments.cartpole.balancetask.BalanceTask()
+        import pybrain.tools.shortcuts
+        net = pybrain.tools.shortcuts.buildNetwork(net_task.outdim, N_hidden, net_task.indim)
+        import pybrain.optimization.hillclimber
+        net_optimizer = pybrain.optimization.hillclimber.HillClimber(net_task, net, maxEvaluations=max_eval)
+        nn_optimizer = pybrain.optimization.hillclimber.HillClimber(nn_task, nn, maxEvaluations=max_eval)
+        nn, nn_best = nn_optimizer.learn()
+        net_optimizer, net_best = net_optimizer.learn()
+        results += [(nn, nn_best, net, net_best)]
+        if verbosity >= 0:
+            print(results[-1][1], results[-1][3])
+            print(sum((a[1]-a[3]) for a in results) / float(len(results)))
+            print(sum((a[1]>a[3]) for a in results) / float(len(results)))
+
+
 
     # # alternatively:
     # agent = ( pybrain.rl.agents.OptimizationAgent(net, HillClimber())
@@ -111,7 +142,7 @@ def thermostat(
     #           pybrain.rl.agents.LearningAgent(net, pybrain.rl.learners.ENAC()) )
     # exp = pybrain.rl.experiments.EpisodicExperiment(task, agent).doEpisodes(100)
 
-    return optimizer 
+    return results
 
 
 def maze():

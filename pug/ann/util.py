@@ -66,9 +66,8 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Sigmoid',
     hidden_layer_type = hidden_layer_type or tuple()
     hidden_layer_type = tuplify(normalize_layer_type(hidden_layer_type))
 
-    if verbosity:
-        print(N_hidden)
-        print(hidden_layer_type)
+    if verbosity > 0:
+        print(N_hidden,' layers of type ', hidden_layer_type)
 
     assert(len(N_hidden) == len(hidden_layer_type))
     nn = pb.structure.FeedForwardNetwork()
@@ -92,7 +91,6 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Sigmoid',
 
     nn.sortModules()
     if verbosity > 0:
-        print(nn)
         print(nn.connections)
     return nn
 
