@@ -127,7 +127,7 @@ def api(feature='conditions', city='Portland',state='OR', key=None):
     feature = util.fuzzy_get(features, feature)
     # Please be kind and use your own key (they're FREE!):
     # http://www.wunderground.com/weather/api/d/login.html
-    key = key or env.get('WUNDERGROUND', None, verbosity=-1) or env.get('WUNDERGROUND_KEY', 'c45a86c2fc63f7d9', verbosity=-1)  
+    key = key or env.get('WUNDERGROUND', None, verbosity=-1) or env.get('WUNDERGROUND_KEY', 'c45a86c2fc63f7d0', verbosity=-1)  
     url = 'http://api.wunderground.com/api/{key}/{feature}/q/{state}/{city}.json'.format(
         key=key, feature=feature, state=state, city=city)
     return json.load(urllib.urlopen(url))
