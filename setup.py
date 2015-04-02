@@ -38,15 +38,12 @@ try:
 except:  # (IOError, ImportError, OSError, RuntimeError):
     print('WARNING: Unable to find or read README.rst.')
 
-
 dependency_links = [] #  ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master'] 
 EXCLUDE_FROM_PACKAGES = []
-
 
 print('Installing package named {} from the {} project. . .'.format(package_name, project_name))
 packages = list(set([package_name] + list(find_packages(exclude=EXCLUDE_FROM_PACKAGES))))
 print('Packages being installed: {}'.format(packages))
-
 
 # sudo yum install libjpeg-devel openjpeg-devel
 install_requires = [
@@ -71,7 +68,7 @@ install_requires = [
     'scipy>=0.15.1',
     'pybrain>=0.3.3',
 
-    'pug-nlp>=0.0.15',
+    'pug-nlp>=0.0.17',
     ]
 print('install_requires: {}'.format(install_requires))
 
