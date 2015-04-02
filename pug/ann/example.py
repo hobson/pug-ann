@@ -4,9 +4,10 @@ Installation:
 
     pip install pug-ann
 
-Usage:
+Examples:
 
-    >> trainer = predict_weather('San Francisco, CA', epochs=2, years=1, delays=[1,2], verbosity=0)
+    >>> predict_weather('San Francisco, CA', epochs=2, years=range(2010,2015), delays=[1,2], verbosity=0)  # doctest: +ELLIPSIS
+    <RPropMinusTrainer 'RPropMinusTrainer-...'>
 """
 
 from pug.ann.data import weather
