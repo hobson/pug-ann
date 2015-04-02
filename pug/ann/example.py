@@ -52,6 +52,18 @@ def predict_weather(
     training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
     return trainer
 
+# from pybrain.rl.environments.function import FunctionEnvironment
+
+# class SupplyEnvironment(FunctionEnvironment):
+#     desiredValue = 0
+
+#     def __init__(self, *args, **kwargs):
+#         FunctionEnvironment.__init__(self, *args, **kwargs)
+
+#     def f(self, x):
+#         return min(dot(x - 2.5 * ones(self.xdim), x - 2.5 * ones(self.xdim)), \
+#             self.funnelDepth * self.xdim + self.funnelSize * dot(x + 2.5 * ones(self.xdim), x + 2.5 * ones(self.xdim)))
+
 
 def thermostat(
     location='Camas, WA',
@@ -86,7 +98,20 @@ def thermostat(
             means and stds allow normalization of new inputs and denormalization of the outputs
 
     """
-    pass
+    import pybrain.rl.environments.cartpole.balancetask
+    task = pybrain.rl.environments.cartpole.balancetask.BalanceTask()
+    # controller
+    nn = util.build_ann(task.outdim, 3, task.indim)
+    import pybrain.optimization.hillclimber
+    optimizer = pybrain.optimization.hillclimber.HillClimber(task, nn, maxEvaluations=100).learn()
+
+    # # alternatively:
+    # agent = ( pybrain.rl.agents.OptimizationAgent(net, HillClimber())
+    #             or
+    #           pybrain.rl.agents.LearningAgent(net, pybrain.rl.learners.ENAC()) )
+    # exp = pybrain.rl.experiments.EpisodicExperiment(task, agent).doEpisodes(100)
+
+    return optimizer 
 
 
 def maze():
