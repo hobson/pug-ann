@@ -11,6 +11,7 @@ from pug.nlp import util, env
 
 
 DATA_PATH = os.path.dirname(os.path.realpath(__file__))
+CACHE_PATH = os.path.join(DATA_PATH, 'cache')
 
 
 def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosity=1):
@@ -40,7 +41,7 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
 
     # refresh the cache each calendar month or each change in the number of days in the dataset
     cache_path = 'hourly-{}-{}-{:02d}-{:04d}.csv'.format(airport_code, days[-1].year, days[-1].month, len(days))
-    cache_path = os.path.join(DATA_PATH, 'cache', cache_path)
+    cache_path = os.path.join(CACHE_PATH, cache_path)
     try:
         return pd.DataFrame.from_csv(cache_path)
     except:
@@ -156,7 +157,7 @@ def daily(location='Fresno, CA', years=1, verbosity=1):
 
     # refresh the cache each time the start or end year changes
     cache_path = 'daily-{}-{}-{}.csv'.format(airport_code, years[0], years[-1])
-    cache_path = os.path.join(DATA_PATH, 'cache', cache_path)
+    cache_path = os.path.join(CACHE_PATH, cache_path)
     try:
         return pd.DataFrame.from_csv(cache_path)
     except:
@@ -211,6 +212,6 @@ def daily(location='Fresno, CA', years=1, verbosity=1):
         print(df)
     df.to_csv(cache_path)
     return df
-daily.locations = json.load(open(os.path.join(DATA_PATH, 'airport.locations.json'), 'rUb'))
+daily.locations = json.load(open(os.path.join(CACHE_PATH, 'airport.locations.json'), 'rUb'))
 # airport.locations = dict([(str(city) + ', ' + str(region)[-2:], str(ident)) for city, region, ident in pd.DataFrame.from_csv(os.path.join(DATA_PATH, 'airports.csv')).sort(ascending=False)[['municipality', 'iso_region', 'ident']].values])
 

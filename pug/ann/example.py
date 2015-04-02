@@ -134,6 +134,7 @@ class BalanceTask(EpisodicTask):
 
     def reset(self):
         EpisodicTask.reset(self)
+        self.day = weather.get_day(date='random')
         self.t = 0
 
     def performAction(self, action):
