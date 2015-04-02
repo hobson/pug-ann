@@ -1,5 +1,5 @@
 pip==6.0.7  # this is the version used by travis
-# setuptools==14.3.1
+setuptools==3.6  # 14.3.1
 
 #$ sudo yum install -y pandoc
 # pypandoc>=0.8.2  # this one doesn't error if pandoc lib/dev isn't present, 0.9.* will error on travis
@@ -14,8 +14,8 @@ cffi==0.8.6
 chardet==2.3.0
 
 pyOpenSSL==0.14
-pytz==2015.2
-python-dateutil==2.4.1
+pytz==2014.10
+python-dateutil==2.4.0
 
 pandas>=0.15.2
 xlrd==0.9.3
@@ -33,11 +33,12 @@ python-slugify==0.1.0
 # pug-ann requirements
 
 # pybrain requires scipy which requires these, but doesn't install them when you do `pip install pybrain` (which fails due to failed imports)
-numpy==1.9.2
+# numpy==1.9.2
 pyparsing==2.0.3
-# scipy==0.15.1  
-pybrain>=0.3.3
-# pug-nlp==0.0.15
+# scipy==0.15.1
+
+# pybrain>=0.3.3
+# pug-nlp
 
 ######################
 # # dev requirements
