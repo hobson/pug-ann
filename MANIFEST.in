@@ -5,6 +5,6 @@ include *.md
 # recursive-include . *.md
 include *.rst
 # recursive-include . *.rst
-recursive-include pug/ann/data/ *
-recursive-include pug/ann/data/ *.json
-recursive-include pug/ann/data/ *.csv
+recursive-include pug/ann/data *
+recursive-include pug/ann/data *.json
+recursive-include pug/ann/data *.csv
