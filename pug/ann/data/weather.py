@@ -19,11 +19,11 @@ def airport(location, default=None):
 airport.locations = json.load(open(os.path.join(CACHE_PATH, 'airport.locations.json'), 'rUb'))
 
 
-def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosity=1):
-    """GEt detailed (hourly) weather data for the requested days and location
+def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, use_cache=True, verbosity=1):
+    """ Get detailed (hourly) weather data for the requested days and location
 
-    The Weather Underground URL for Sacramento, CA is:
-    http://www.wunderground.com/history/airport/KFCI/2011/1/1/DailyHistory.html?MR=1&format=1
+    The Weather Underground URL for Fresno, CA on 1/1/2011 is:
+    http://www.wunderground.com/history/airport/KFAT/2011/1/1/DailyHistory.html?MR=1&format=1
 
     This will fail periodically on Travis, b/c wunderground says "No daily or hourly history data available"
     >> df = hourly('Fresno, CA', verbosity=-1)
@@ -47,10 +47,11 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
     # refresh the cache each calendar month or each change in the number of days in the dataset
     cache_path = 'hourly-{}-{}-{:02d}-{:04d}.csv'.format(airport_code, days[-1].year, days[-1].month, len(days))
     cache_path = os.path.join(CACHE_PATH, cache_path)
-    try:
-        return pd.DataFrame.from_csv(cache_path)
-    except:
-        pass
+    if use_cache:
+        try:
+            return pd.DataFrame.from_csv(cache_path)
+        except:
+            pass
 
     df = pd.DataFrame()
     for day in days:
@@ -68,7 +69,7 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
             print('Retrieved CSV for airport code "{}" with appox. {} lines and {} columns = {} cells.'.format(
                   airport_code, N, int(round(M)), int(round(M)) * N))
         if (buf.count('\n') > 2) or ((buf.count('\n') > 1) and buf.split('\n')[1].count(',') > 0):  
-            table = util.read_csv(buf, format='values-list', numbers=True)
+            table = util.read_csv(buf, format='header+values-list', numbers=True)
             columns = [s.strip() for s in table[0]]
             table = table[1:]
             tzs = [s[4:] for s in columns if (s[5:] in ['ST', 'DT'] and s[4] in 'PMCE' and s[:4].lower() == 'time')]
@@ -94,7 +95,13 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, verbosi
                     airport_code, day)
                 msg += "Attempted a GET request using the URI:\n    {0}\n".format(url)
                 warnings.warn(msg)
-    df.to_csv(cache_path)
+    try:
+        df.to_csv(cache_path)
+    except:
+        if verbosity > 0 and use_cache:
+            from traceback import print_exc
+            print_exc()
+            warnings.warn('Unable to write weather data to cache file at {}'.format(cache_path))
     return df
 
 
@@ -133,7 +140,7 @@ def api(feature='conditions', city='Portland',state='OR', key=None):
     return json.load(urllib.urlopen(url))
 
 
-def daily(location='Fresno, CA', years=1, verbosity=1):
+def daily(location='Fresno, CA', years=1, use_cache=True, verbosity=1):
     """Retrieve weather for the indicated airport code or 'City, ST' string.
 
     >>> df = daily('Camas, WA', verbosity=-1)
@@ -163,10 +170,11 @@ def daily(location='Fresno, CA', years=1, verbosity=1):
     # refresh the cache each time the start or end year changes
     cache_path = 'daily-{}-{}-{}.csv'.format(airport_code, years[0], years[-1])
     cache_path = os.path.join(CACHE_PATH, cache_path)
-    try:
-        return pd.DataFrame.from_csv(cache_path)
-    except:
-        pass
+    if use_cache:
+        try:
+            return pd.DataFrame.from_csv(cache_path)
+        except:
+            pass
 
     df = pd.DataFrame()
     for year in years:
@@ -185,7 +193,7 @@ def daily(location='Fresno, CA', years=1, verbosity=1):
             print('Retrieved CSV for airport code "{}" with appox. {} lines and {} columns = {} cells.'.format(
                   airport_code, N, int(round(M)), int(round(M)) * N))
 
-        table = util.read_csv(buf, format='values-list', numbers=True)
+        table = util.read_csv(buf, format='header+values-list', numbers=True)
         # # clean up the last column (if it contains <br> tags)
         # table = [row[:-1] + [re.sub(r'\s*<br\s*[/]?>\s*$','', row[-1])] for row in table]
         # numcols = max(len(row) for row in table)
@@ -215,7 +223,15 @@ def daily(location='Fresno, CA', years=1, verbosity=1):
 
     if verbosity > 1:
         print(df)
-    df.to_csv(cache_path)
+
+    try:
+        df.to_csv(cache_path)
+    except:
+        if verbosity > 0 and use_cache:
+            from traceback import print_exc
+            print_exc()
+            warnings.warn('Unable to write weather data to cache file at {}'.format(cache_path))
+
     return df
 # airport.locations = dict([(str(city) + ', ' + str(region)[-2:], str(ident)) for city, region, ident in pd.DataFrame.from_csv(os.path.join(CACHE_PATH, 'airports.csv')).sort(ascending=False)[['municipality', 'iso_region', 'ident']].values])
 

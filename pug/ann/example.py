@@ -6,14 +6,14 @@ Installation:
 
 Examples:
 
-    >>> predict_weather('San Francisco, CA', epochs=2, years=range(2010,2015), delays=[1,2], verbosity=0)  # doctest: +ELLIPSIS
+    >>> train_weather_predictor('San Francisco, CA', epochs=2, years=range(2010,2015), delays=[1,2], verbosity=0)  # doctest: +ELLIPSIS
     <RPropMinusTrainer 'RPropMinusTrainer-...'>
 """
 
 from pug.ann.data import weather
 from pug.ann import util
 
-def predict_weather(
+def train_weather_predictor(
             location='Camas, WA',
             years=range(2012, 2015),
             delays=[1,2,3], 
@@ -46,23 +46,27 @@ def predict_weather(
 
     """
     df = weather.daily(location, years=years, verbosity=verbosity).sort()
-    ds, means, stds = util.dataset_from_dataframe(df, delays=delays, inputs=inputs, outputs=outputs, verbosity=verbosity)
+    ds, means, stds = util.dataset_from_dataframe(df, normalize=False, delays=delays, inputs=inputs, outputs=outputs, verbosity=verbosity)
     nn = util.ann_from_ds(ds, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds, verbosity=verbosity)
     training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
-    return trainer
+    return trainer, means, stds
 
-# from pybrain.rl.environments.function import FunctionEnvironment
 
-# class SupplyEnvironment(FunctionEnvironment):
-#     desiredValue = 0
+def weather_tomorrow(location='Camas, WA'):
+    """ Provide a weather forecast for tomorrow based on historical weather at that location """
+    trainer = train_weather_predictor(location,
+        years=10, delays=(1,2,3,4),
+        inputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level PressureIn', 'Mean Sea Level PressureIn', 'Min Sea Level PressureIn', 'WindDirDegrees'], 
+        outputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'],
+        epochs=300,
+        verbosity=1
+        )
+    nn = trainer.module
+    return nn
 
-#     def __init__(self, *args, **kwargs):
-#         FunctionEnvironment.__init__(self, *args, **kwargs)
 
-#     def f(self, x):
-#         return min(dot(x - 2.5 * ones(self.xdim), x - 2.5 * ones(self.xdim)), \
-#             self.funnelDepth * self.xdim + self.funnelSize * dot(x + 2.5 * ones(self.xdim), x + 2.5 * ones(self.xdim)))
+
 
 
 def thermostat(
