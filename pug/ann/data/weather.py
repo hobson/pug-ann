@@ -91,8 +91,8 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, use_cac
             elif verbosity >= 0:
                 msg = "The number of columns in the 1st row of the table:\n    {}\n    doesn't match the number of column labels:\n    {}\n".format(
                     table[0], columns)
-                msg += "Wunderground.com probably can't find the airport: {}\n    or the date: {}\n    in its database.\n".format(
-                    airport_code, day)
+                msg += "Wunderground.com probably can't find the airport: {} ({})\n    or the date: {}\n    in its database.\n".format(
+                    airport_code, location, day)
                 msg += "Attempted a GET request using the URI:\n    {0}\n".format(url)
                 warnings.warn(msg)
     try:
