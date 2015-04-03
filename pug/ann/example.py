@@ -7,7 +7,7 @@ Installation:
 Examples:
 
     >>> train_weather_predictor('San Francisco, CA', epochs=2, years=range(2010,2015), delays=[1,2], verbosity=0)  # doctest: +ELLIPSIS
-    <RPropMinusTrainer 'RPropMinusTrainer-...'>
+    (<RPropMinusTrainer 'RPropMinusTrainer-8'>, array([ 0.,  0.,  0.,  0.,  0.,  0.]), array([ 1.,  1.,  1.,  1.,  1.,  1.]))
 """
 
 from pug.ann.data import weather
