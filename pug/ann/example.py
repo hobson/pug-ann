@@ -6,14 +6,14 @@ Installation:
 
 Examples:
 
-    >>> predict_weather('San Francisco, CA', epochs=2, years=range(2010,2015), delays=[1,2], verbosity=0)  # doctest: +ELLIPSIS
+    >>> train_weather_predictor('San Francisco, CA', epochs=2, years=range(2010,2015), delays=[1,2], verbosity=0)  # doctest: +ELLIPSIS
     <RPropMinusTrainer 'RPropMinusTrainer-...'>
 """
 
 from pug.ann.data import weather
 from pug.ann import util
 
-def predict_weather(
+def train_weather_predictor(
             location='Camas, WA',
             years=range(2012, 2015),
             delays=[1,2,3], 
@@ -46,23 +46,27 @@ def predict_weather(
 
     """
     df = weather.daily(location, years=years, verbosity=verbosity).sort()
-    ds, means, stds = util.dataset_from_dataframe(df, delays=delays, inputs=inputs, outputs=outputs, verbosity=verbosity)
+    ds, means, stds = util.dataset_from_dataframe(df, normalize=False, delays=delays, inputs=inputs, outputs=outputs, verbosity=verbosity)
     nn = util.ann_from_ds(ds, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds, verbosity=verbosity)
     training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
-    return trainer
+    return trainer, means, stds
 
-# from pybrain.rl.environments.function import FunctionEnvironment
 
-# class SupplyEnvironment(FunctionEnvironment):
-#     desiredValue = 0
+def weather_tomorrow(location='Camas, WA'):
+    """ Provide a weather forecast for tomorrow based on historical weather at that location """
+    trainer = train_weather_predictor(location,
+        years=10, delays=(1,2,3,4),
+        inputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level PressureIn', 'Mean Sea Level PressureIn', 'Min Sea Level PressureIn', 'WindDirDegrees'], 
+        outputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'],
+        epochs=300,
+        verbosity=1
+        )
+    nn = trainer.module
+    return nn
 
-#     def __init__(self, *args, **kwargs):
-#         FunctionEnvironment.__init__(self, *args, **kwargs)
 
-#     def f(self, x):
-#         return min(dot(x - 2.5 * ones(self.xdim), x - 2.5 * ones(self.xdim)), \
-#             self.funnelDepth * self.xdim + self.funnelSize * dot(x + 2.5 * ones(self.xdim), x + 2.5 * ones(self.xdim)))
+
 
 
 def thermostat(
@@ -102,13 +106,81 @@ def thermostat(
     pass
 
 
-from pybrain.rl.environments.cartpole.balancetask import BalanceTask
+from pybrain.rl.environments import EpisodicTask
+from pybrain.rl.environments.cartpole import CartPoleEnvironment
+from pybrain.rl.environments.cartpole.nonmarkovpole import NonMarkovPoleEnvironment
+
+class BalanceTask(EpisodicTask):
+    """ The task of balancing some pole(s) on a cart """
+    def __init__(self, env=None, maxsteps=1000, desiredValue=0, location='Portland, OR'):
+        """
+        :key env: (optional) an instance of a CartPoleEnvironment (or a subclass thereof)
+        :key maxsteps: maximal number of steps (default: 1000)
+        """
+        self.location = location
+        self.airport_code = weather.airport(location)
+        self.desiredValue = desiredValue
+        if env == None:
+            env = CartPoleEnvironment()
+        EpisodicTask.__init__(self, env)
+        self.N = maxsteps
+        self.t = 0
+
+        # scale position and angle, don't scale velocities (unknown maximum)
+        self.sensor_limits = [(-3, 3)]
+        for i in range(1, self.outdim):
+            if isinstance(self.env, NonMarkovPoleEnvironment) and i % 2 == 0:
+                self.sensor_limits.append(None)
+            else:
+                self.sensor_limits.append((-np.pi, np.pi))
+
+        # self.sensor_limits = [None] * 4
+        # actor between -10 and 10 Newton
+        self.actor_limits = [(-50, 50)]
+
+    def reset(self):
+        EpisodicTask.reset(self)
+        self.day = weather.get_day(date='random')
+        self.t = 0
+
+    def performAction(self, action):
+        self.t += 1
+        EpisodicTask.performAction(self, action)
+
+    def isFinished(self):
+        if max(list(map(abs, self.env.getPoleAngles()))) > 0.7:
+            # pole has fallen
+            return True
+        elif abs(self.env.getCartPosition()) > 2.4:
+            # cart is out of it's border conditions
+            return True
+        elif self.t >= self.N:
+            # maximal timesteps
+            return True
+        return False
+
+    def getReward(self):
+        angles = list(map(abs, self.env.getPoleAngles()))
+        s = abs(self.env.getCartPosition())
+        reward = 0
+        if min(angles) < 0.05 and abs(s) < 0.05:
+            reward = 0
+        elif max(angles) > 0.7 or abs(s) > 2.4:
+            reward = -2 * (self.N - self.t)
+        else:
+            reward = -1
+        return reward
+
+    def setMaxLength(self, n):
+        self.N = n
+
+
 from pybrain.tools.shortcuts import buildNetwork, NetworkError
 from pybrain.optimization.hillclimber import HillClimber
 import time
 import numpy as np
 
-def compete_carts(builders=[], task=BalanceTask(), Optimizer=HillClimber, attempts=100, max_eval=1000, N_hidden=6, verbosity=0):
+def run_competition(builders=[], task=BalanceTask(), Optimizer=HillClimber, rounds=3, max_eval=20, N_hidden=3, verbosity=0):
     """ pybrain buildNetwork builds a subtly different network than build_ann... so compete them!
 
     buildNetwork connects the bias to the output
@@ -116,14 +188,11 @@ def compete_carts(builders=[], task=BalanceTask(), Optimizer=HillClimber, attemp
 
     build_ann allows heterogeneous layer types but the output layer is always linear
     buildNetwork allows specification of the output layer type
-
-    build_network performs better 65% of the time
-    and has an average performance metric that is about 20 "points" greater (out of 2000)
     """
     results = []
     builders = list(builders) + [buildNetwork, util.build_ann]
 
-    for attempt in range(attempts):
+    for r in range(rounds):
         heat = []
 
         # FIXME: shuffle the order of the builders to keep things fair 
@@ -143,7 +212,7 @@ def compete_carts(builders=[], task=BalanceTask(), Optimizer=HillClimber, attemp
             heat += [(nn_best, t1-t0, nn)]
         results += [tuple(heat)]
         if verbosity >= 0:
-            print([h[:2] for h in heat])
+            print([competitor_scores[:2] for competitor_scores in heat])
 
 
     # # alternatively:
@@ -152,26 +221,33 @@ def compete_carts(builders=[], task=BalanceTask(), Optimizer=HillClimber, attemp
     #           pybrain.rl.agents.LearningAgent(net, pybrain.rl.learners.ENAC()) )
     # exp = pybrain.rl.experiments.EpisodicExperiment(task, agent).doEpisodes(100)
 
-    print('Mean Performance:')
-    for j in range(2):
-        print([np.array([r[i][j] for r in results]).mean() for i in range(len(results[0]))])
-    return results
+    means = [[np.array([r[i][j] for r in results]).mean() for i in range(len(results[0]))] for j in range(2)]
+    if verbosity > -1:
+        print('Mean Performance:')
+        print(means)
+        perfi, speedi = np.argmax(means[0]), np.argmin(means[1])
+        print('And the winner for performance is ... Algorithm #{} (0-offset array index [{}])'.format(perfi+1, perfi))
+        print('And the winner for speed is ...       Algorithm #{} (0-offset array index [{}])'.format(speedi+1,speedi))
+
+
+    return results, means
+
+
+from pybrain.rl.environments.mazes import Maze, MDPMazeTask
+from pybrain.rl.learners.valuebased import ActionValueTable
+from pybrain.rl.agents import LearningAgent
+from pybrain.rl.learners import Q  # , SARSA # (State-Action-Reward-State-Action)
+from pybrain.rl.experiments import Experiment
+# from pybrain.rl.environments import Task
+import pylab
 
 
 def maze():
-    from scipy import array
     # import sys, time
-    from pybrain.rl.environments.mazes import Maze, MDPMazeTask
-    from pybrain.rl.learners.valuebased import ActionValueTable
-    from pybrain.rl.agents import LearningAgent
-    from pybrain.rl.learners import Q # , SARSA
-    from pybrain.rl.experiments import Experiment
-    # from pybrain.rl.environments import Task
-    import pylab
     pylab.gray()
     pylab.ion()
     # The goal appears to be in the upper right
-    structure = array([[1, 1, 1, 1, 1, 1, 1, 1, 1],
+    structure = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1],
                        [1, 0, 0, 1, 0, 0, 0, 0, 1],
                        [1, 0, 0, 1, 0, 0, 1, 0, 1],
                        [1, 0, 0, 1, 0, 0, 1, 0, 1],
@@ -198,6 +274,8 @@ def maze():
         pylab.draw()
         # pylab.show()
 
+import sys
 
 if __name__ == '__main__':
-    print(predict_weather())
+    print(run_competition(verbosity=0))
+    sys.exit(0)

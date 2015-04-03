@@ -1,0 +1,9 @@
+# pug/ann/data/cache/README
+
+This folder contains locally cached data files (json and csv).
+
+They are used as persistent memory for the "memoization" of data retrieval functions in the pug.ann.data package.
+
+A few (like daily-KSFO-2010-2014.csv) are committed to the repository (along with the source code) to facilitate testing and user exercising of pug.ann.example even when network access is inconsistent.
+
+No EULA's were harmed in the production of this data. ;)  See the LICENSE file in this same folder for more details.
