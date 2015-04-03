@@ -195,7 +195,7 @@ def daily(location='Fresno, CA', years=1, use_cache=True, verbosity=1):
 
         table = util.read_csv(buf, format='header+values-list', numbers=True)
         # # clean up the last column (if it contains <br> tags)
-        # table = [row[:-1] + [re.sub(r'\s*<br\s*[/]?>\s*$','', row[-1])] for row in table]
+        table = [util.strip_br(row) for row in table]
         # numcols = max(len(row) for row in table)
         # table = [row for row in table if len(row) == numcols]
         columns = table.pop(0)
