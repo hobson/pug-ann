@@ -13,6 +13,8 @@ Examples:
 import datetime
 from pug.ann.data import weather
 from pug.ann import util
+from pug.nlp.util import make_date, update_dict
+
 
 def train_weather_predictor(
             location='Camas, WA',
@@ -21,7 +23,7 @@ def train_weather_predictor(
             inputs=['Min TemperatureF', 'Max TemperatureF', 'Min Sea Level PressureIn', u'Max Sea Level PressureIn', 'WindDirDegrees'], 
             outputs=[u'Max TemperatureF'],
             epochs=30,
-            normalize=False,
+            use_cache=False,
             verbosity=2):
     """Predict the weather for tomorrow based on the weather for the past few days
 
@@ -47,15 +49,12 @@ def train_weather_predictor(
             means and stds allow normalization of new inputs and denormalization of the outputs
 
     """
-    df = weather.daily(location, years=years, verbosity=verbosity).sort()
-    ds, means, stds = util.dataset_from_dataframe(df, normalize=normalize, delays=delays, inputs=inputs, outputs=outputs, include_last=False, verbosity=verbosity)
-    ds2 = type(ds)()
-    for sample in range(len(ds)-1):
-        ds2.addSample(ds['input'][sample], ds['target'][sample])
-    nn = util.ann_from_ds(ds2, verbosity=verbosity)
+    df = weather.daily(location, years=years, use_cache=use_cache, verbosity=verbosity).sort()
+    ds = util.dataset_from_dataframe(df, normalize=False, delays=delays, inputs=inputs, outputs=outputs, include_last=False, verbosity=verbosity)
+    nn = util.ann_from_ds(ds, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds=ds, verbosity=verbosity)
     training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
-    return trainer, means, stds, df, ds
+    return trainer
 
 
 def oneday_weather_forecast(location='Camas, WA',
@@ -63,23 +62,39 @@ def oneday_weather_forecast(location='Camas, WA',
     outputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'],
     date=None,
     epochs=70,
+    delays=(1,2,3,4),
+    num_years=10,
+    use_cache=False,
+    verbosity=1
     ):
     """ Provide a weather forecast for tomorrow based on historical weather at that location """
-    date = date or datetime.datetime.now().date()
-    trainer, means, std, historical_weather, ds = train_weather_predictor(location,
-        years=range(date.year-10, date.year), delays=(1,2,3,4),
+    date = make_date(date or datetime.datetime.now().date())
+    num_years = int(num_years or 10)
+    years = range(date.year - num_years, date.year + 1)
+    df = weather.daily(location, years=years, use_cache=use_cache, verbosity=verbosity).sort()
+    # because up-to-date weather history has not been cached, can use that cache, regardless of use_cache kwarg
+    trainer = train_weather_predictor(location,
+        years=years,
+        delays=delays,
         inputs=inputs,
         outputs=outputs,
-        normalize=False,
         epochs=epochs,
-        verbosity=1
+        verbosity=verbosity,
+        use_cache=True,
         )
     nn = trainer.module
-    date = date or historical_weather.index.iloc[-1].date()
-    forecast = {date: dict(zip(outputs, nn.activate(ds['input'][-2])))}
-    forecast['trainer'] = trainer
-    forecast['historical_weather'] = historical_weather
-    forecast[date + datetime.timedelta(1)] = dict(zip(outputs, nn.activate(ds['input'][-1])))
+    forecast = {'trainer': trainer}
+
+    yesterday = dict(zip(outputs, nn.activate(trainer.ds['input'][-2])))
+    forecast['yesterday'] = update_dict(yesterday, { 'date': df.index[-2].date() })
+
+    today = dict(zip(outputs, nn.activate(trainer.ds['input'][-1])))
+    forecast['today'] = update_dict(today, { 'date': df.index[-1].date() })
+
+    ds = util.input_dataset_from_dataframe(df[-max(delays):], delays=delays, inputs=inputs, normalize=False, verbosity=0)
+    tomorrow = dict(zip(outputs, nn.activate(ds['input'][-1])))
+    forecast['tomorrow'] = update_dict(tomorrow, { 'date': (df.index[-1] + datetime.timedelta(1)).date() })
+
     return forecast
 
 

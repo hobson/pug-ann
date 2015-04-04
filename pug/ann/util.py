@@ -104,7 +104,7 @@ def ann_from_ds(ds=None, N_input=3, N_hidden=0, N_output=1, verbosity=1):
     return build_ann(N_input=N_input, N_hidden=N_hidden, N_output=N_output, verbosity=verbosity)
 
 
-def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], normalize=True, include_last=False, verbosity=1):
+def dataset_from_dataframe(df, delays=(1,2,3), inputs=(1, 2, -1), outputs=(-1,), normalize=True, include_last=False, verbosity=1):
     """Compose a pybrain.dataset from a pandas DataFrame
 
     Arguments:
@@ -118,13 +118,21 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], 
     Returns:
         3-tuple: tuple(dataset, list of means, list of stds)
             means and stds allow normalization of new inputs and denormalization of the outputs
+
+    TODO:
+
+        Detect categorical variables with low dimensionality and split into separate bits
+            Vowpel Wabbit hashes strings into an int?
+        Detect ordinal variables and convert to continuous int sequence
+        SEE: http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm
     """
 
     if isinstance(delays, int):
         delays = range(1, delays+1)
     delays = np.abs(np.array([int(i) for i in delays]))
     inputs = [df.columns[int(inp)] if isinstance(inp, (float, int)) else str(inp) for inp in inputs]
-    outputs = [df.columns[int(out)] if isinstance(out, (float, int)) else str(out) for out in outputs]
+    outputs = [df.columns[int(out)] if isinstance(out, (float, int)) else str(out) for out in (outputs or [])]
+
 
     N_inp = len(inputs)
     N_out = len(outputs)
@@ -136,11 +144,12 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], 
     if normalize:
         means, stds = df[inp_outs].mean(), df[inp_outs].std()
 
-    if verbosity > 0:
-        print("input means: {}".format(means[:N_inp]))
+    if normalize and verbosity > 0:
+        print("Input mean values (used to normalize input biases): {}".format(means[:N_inp]))
+        print("Output mean values (used to normalize output biases): {}".format(means[N_inp:]))
     ds = pb.datasets.SupervisedDataSet(N_inp * len(delays), N_out)
     if verbosity > 0:
-        print("Dataset dimensions are {}x{}".format(ds.indim, ds.outdim))
+        print("Dataset dimensions are {}x{} (indim x outdim)".format(ds.indim, ds.outdim))
     for i, out_vec in enumerate(df[outputs].values):
         if verbosity > 1:
             print('sample[{i}].target={out_vec}'.format(i=i, out_vec=out_vec))
@@ -159,7 +168,34 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], 
         ds.addSample(inp_vec, float('nan') * np.ones(N_out))
     if verbosity > 0:
         print("Dataset now has {} samples".format(len(ds)))
-    return ds, means, stds
+    if normalize:
+        return ds, means, stds
+    else:
+        return ds
+
+
+def input_dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=None, normalize=True, include_last=True, verbosity=1):
+    """ Build a dataset with an empty output/target vector 
+
+    Identical to `dataset_from_dataframe`, except that default values for 2 arguments:
+        outputs: None
+        include_last: True
+    """
+    return dataset_from_dataframe(df=df, delays=delays, inputs=inputs, outputs=outputs, normalize=normalize, include_last=include_last, verbosity=verbosity)
+
+
+def inputs_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=None, normalize=True, include_last=True, verbosity=1):
+    """ Build a sequence of vectors suitable for "activation" by a neural net 
+
+    Identical to `dataset_from_dataframe`, except that only the input vectors are
+    returned (not a full DataSet instance) and default values for 2 arguments are changed:
+        outputs: None
+        include_last: True
+
+    And only the input vectors are return
+    """
+    ds = input_dataset_from_dataframe(df=df, delays=delays, inputs=inputs, outputs=outputs, normalize=normalize, include_last=include_last, verbosity=verbosity)
+    return ds['input']
 
 
 def build_trainer(nn, ds, verbosity=1):
