@@ -6,9 +6,14 @@ Installation:
 
 Examples:
 
-    >>> trainer = train_weather_predictor('San Francisco, CA', epochs=1, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2014,2015), delays=(1,), use_cache=True, verbosity=0)
+    >>> trainer = train_weather_predictor('San Francisco, CA', epochs=3, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2014,2015), delays=(1,), use_cache=True, verbosity=0)
 
-    Catches a mysterious bug in pybrain on my maze__init__ branch.
+    >>> all(trainer.module.activate(trainer.ds['input'][0]) == trainer.module.activate(trainer.ds['input'][1]))
+    False
+    >>> len(trainer.trainUntilConvergence(maxEpochs=20)[0])
+    2
+
+    Catches a mysterious bug in pybrain on my maze__init__ and master branch.
     The bug causes activate() to return the exact same value on each run, 
     unless the FFNetwork.reset() call is commented out.
     >>> all(trainer.module.activate(trainer.ds['input'][0]) == trainer.module.activate(trainer.ds['input'][1]))
@@ -59,7 +64,7 @@ def train_weather_predictor(
     ds = util.dataset_from_dataframe(df, normalize=False, delays=delays, inputs=inputs, outputs=outputs, include_last=False, verbosity=verbosity)
     nn = util.ann_from_ds(ds, N_hidden=N_hidden, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds=ds, verbosity=verbosity)
-    training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
+    training_err, validation_err = trainer.trainEpochs(epochs, verbose=bool(verbosity))
     return trainer
 
 
