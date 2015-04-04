@@ -6,11 +6,12 @@ Installation:
 
 Examples:
 
-    >>> trainer = train_weather_predictor('San Francisco, CA', epochs=1, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2014,2015), delays=(1,), use_cache=True, verbosity=1)
+    >>> trainer = train_weather_predictor('San Francisco, CA', epochs=1, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2014,2015), delays=(1,), use_cache=True, verbosity=0)
+
     Catches a mysterious bug in pybrain on my maze__init__ branch.
     The bug causes activate() to return the exact same value on each run, 
     unless the FFNetwork.reset() call is commented out.
-    >>> trainer.module.activate(trainer.ds['input'][0]) == trainer.module.activate(trainer.ds['input'][1])
+    >>> all(trainer.module.activate(trainer.ds['input'][0]) == trainer.module.activate(trainer.ds['input'][1]))
     False
 """
 
