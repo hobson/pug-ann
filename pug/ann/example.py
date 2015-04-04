@@ -48,35 +48,37 @@ def train_weather_predictor(
 
     """
     df = weather.daily(location, years=years, verbosity=verbosity).sort()
-    ds, means, stds = util.dataset_from_dataframe(df, normalize=normalize, delays=delays, inputs=inputs, outputs=outputs, verbosity=verbosity)
-    nn = util.ann_from_ds(ds, verbosity=verbosity)
-    trainer = util.build_trainer(nn, ds, verbosity=verbosity)
+    ds, means, stds = util.dataset_from_dataframe(df, normalize=normalize, delays=delays, inputs=inputs, outputs=outputs, include_last=False, verbosity=verbosity)
+    ds2 = type(ds)()
+    for sample in range(len(ds)-1):
+        ds2.addSample(ds['input'][sample], ds['target'][sample])
+    nn = util.ann_from_ds(ds2, verbosity=verbosity)
+    trainer = util.build_trainer(nn, ds=ds, verbosity=verbosity)
     training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
-    return trainer, means, stds, df
+    return trainer, means, stds, df, ds
 
 
 def oneday_weather_forecast(location='Camas, WA',
     inputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level PressureIn', 'Mean Sea Level PressureIn', 'Min Sea Level PressureIn', 'WindDirDegrees'], 
     outputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'],
-    date=None
+    date=None,
+    epochs=70,
     ):
     """ Provide a weather forecast for tomorrow based on historical weather at that location """
     date = date or datetime.datetime.now().date()
-    trainer, means, std, historical_weather = train_weather_predictor(location,
+    trainer, means, std, historical_weather, ds = train_weather_predictor(location,
         years=range(date.year-10, date.year), delays=(1,2,3,4),
         inputs=inputs,
         outputs=outputs,
         normalize=False,
-        epochs=70,
+        epochs=epochs,
         verbosity=1
         )
     nn = trainer.module
-    ds = trainer.ds
-    today = historical_weather.index.iloc[-1].date()
-    forecast = {today: dict(zip(outputs, nn.activate(ds['input'][-1])))}
+    date = date or historical_weather.index.iloc[-1].date()
+    forecast = {date: dict(zip(outputs, nn.activate(ds['input'][-2])))}
     forecast['trainer'] = trainer
     forecast['historical_weather'] = historical_weather
-    
     forecast[date + datetime.timedelta(1)] = dict(zip(outputs, nn.activate(ds['input'][-1])))
     return forecast
 
