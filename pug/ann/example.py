@@ -6,8 +6,12 @@ Installation:
 
 Examples:
 
-    >>> train_weather_predictor('San Francisco, CA', epochs=2, years=range(2010,2015), delays=[1,2], verbosity=0)  # doctest: +ELLIPSIS
-    (<RPropMinusTrainer 'RPropMinusTrainer-8'>, array([ 0.,  0.,  0.,  0.,  0.,  0.]), array([ 1.,  1.,  1.,  1.,  1.,  1.]))
+    >>> trainer = train_weather_predictor('San Francisco, CA', epochs=1, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2014,2015), delays=(1,), use_cache=True, verbosity=1)
+    Catches a mysterious bug in pybrain on my maze__init__ branch.
+    The bug causes activate() to return the exact same value on each run, 
+    unless the FFNetwork.reset() call is commented out.
+    >>> trainer.module.activate(trainer.ds['input'][0]) == trainer.module.activate(trainer.ds['input'][1])
+    False
 """
 
 import datetime
@@ -22,6 +26,7 @@ def train_weather_predictor(
             delays=[1,2,3], 
             inputs=['Min TemperatureF', 'Max TemperatureF', 'Min Sea Level PressureIn', u'Max Sea Level PressureIn', 'WindDirDegrees'], 
             outputs=[u'Max TemperatureF'],
+            N_hidden=6,
             epochs=30,
             use_cache=False,
             verbosity=2):
@@ -51,7 +56,7 @@ def train_weather_predictor(
     """
     df = weather.daily(location, years=years, use_cache=use_cache, verbosity=verbosity).sort()
     ds = util.dataset_from_dataframe(df, normalize=False, delays=delays, inputs=inputs, outputs=outputs, include_last=False, verbosity=verbosity)
-    nn = util.ann_from_ds(ds, verbosity=verbosity)
+    nn = util.ann_from_ds(ds, N_hidden=N_hidden, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds=ds, verbosity=verbosity)
     training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
     return trainer
@@ -261,47 +266,61 @@ def run_competition(builders=[], task=BalanceTask(), Optimizer=HillClimber, roun
 
     return results, means
 
+try:
+    # this will fail on latest master branch of pybrain as well as latest pypi release of pybrain
+    from pybrain.rl.environments.mazes import Maze, MDPMazeTask
+    from pybrain.rl.learners.valuebased import ActionValueTable
+    from pybrain.rl.agents import LearningAgent
+    from pybrain.rl.learners import Q  # , SARSA # (State-Action-Reward-State-Action)
+    from pybrain.rl.experiments import Experiment
+    # from pybrain.rl.environments import Task
+    import pylab
 
-from pybrain.rl.environments.mazes import Maze, MDPMazeTask
-from pybrain.rl.learners.valuebased import ActionValueTable
-from pybrain.rl.agents import LearningAgent
-from pybrain.rl.learners import Q  # , SARSA # (State-Action-Reward-State-Action)
-from pybrain.rl.experiments import Experiment
-# from pybrain.rl.environments import Task
-import pylab
 
+    def maze():
+        # import sys, time
+        pylab.gray()
+        pylab.ion()
+        # The goal appears to be in the upper right
+        structure = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1],
+                           [1, 0, 0, 1, 0, 0, 0, 0, 1],
+                           [1, 0, 0, 1, 0, 0, 1, 0, 1],
+                           [1, 0, 0, 1, 0, 0, 1, 0, 1],
+                           [1, 0, 0, 1, 0, 1, 1, 0, 1],
+                           [1, 0, 0, 0, 0, 0, 1, 0, 1],
+                           [1, 1, 1, 1, 1, 1, 1, 0, 1],
+                           [1, 0, 0, 0, 0, 0, 0, 0, 1],
+                           [1, 1, 1, 1, 1, 1, 1, 1, 1]])
+        shape = np.array(structure.shape)
+        environment = Maze(structure, tuple(shape - 2))
+        controller = ActionValueTable(shape.prod(), 4)
+        controller.initialize(1.)
+        learner = Q()
+        agent = LearningAgent(controller, learner)
+        task = MDPMazeTask(environment)
+        experiment = Experiment(task, agent)
 
-def maze():
-    # import sys, time
-    pylab.gray()
-    pylab.ion()
-    # The goal appears to be in the upper right
-    structure = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1],
-                       [1, 0, 0, 1, 0, 0, 0, 0, 1],
-                       [1, 0, 0, 1, 0, 0, 1, 0, 1],
-                       [1, 0, 0, 1, 0, 0, 1, 0, 1],
-                       [1, 0, 0, 1, 0, 1, 1, 0, 1],
-                       [1, 0, 0, 0, 0, 0, 1, 0, 1],
-                       [1, 1, 1, 1, 1, 1, 1, 0, 1],
-                       [1, 0, 0, 0, 0, 0, 0, 0, 1],
-                       [1, 1, 1, 1, 1, 1, 1, 1, 1]])
-    environment = Maze(structure, (7, 7))
-    controller = ActionValueTable(81, 4)
-    controller.initialize(1.)
-    learner = Q()
-    agent = LearningAgent(controller, learner)
-    task = MDPMazeTask(environment)
-    experiment = Experiment(task, agent)
+        for i in range(100):
+            experiment.doInteractions(100)
+            agent.learn()
+            agent.reset()
+            # 4 actions, 81 locations/states (9x9 grid)
+            # max(1) gives/plots the biggest objective function value for that square
+            pylab.pcolor(controller.params.reshape(81,4).max(1).reshape(9,9))
+            pylab.draw()
 
-    for i in range(100):
-        experiment.doInteractions(100)
-        agent.learn()
-        agent.reset()
-        # 4 actions, 81 locations/states (9x9 grid)
-        # max(1) gives/plots the biggest objective function value for that square
-        pylab.pcolor(controller.params.reshape(81,4).max(1).reshape(9,9))
-        pylab.draw()
-        # pylab.show()
+        # (0, 0) is upper left and (0, N) is upper right, so flip matrix upside down to match NESW action order 
+        greedy_policy = np.argmax(controller.params.reshape(shape.prod(), 4),1)
+        greedy_policy = np.flipud(np.array(list('NESW'))[greedy_policy].reshape(shape))
+        maze = np.flipud(np.array(list(' #'))[structure])
+        print('Maze map:')
+        print('\n'.join(''.join(row) for row in maze))
+        print('Greedy policy:')
+        print('\n'.join(''.join(row) for row in greedy_policy))
+
+            # pylab.show()
+except ImportError:
+    pass
 
 import sys
 
