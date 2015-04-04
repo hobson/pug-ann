@@ -20,6 +20,7 @@ def train_weather_predictor(
             inputs=['Min TemperatureF', 'Max TemperatureF', 'Min Sea Level PressureIn', u'Max Sea Level PressureIn', 'WindDirDegrees'], 
             outputs=[u'Max TemperatureF'],
             epochs=30,
+            normalize=False,
             verbosity=2):
     """Predict the weather for tomorrow based on the weather for the past few days
 
@@ -46,27 +47,32 @@ def train_weather_predictor(
 
     """
     df = weather.daily(location, years=years, verbosity=verbosity).sort()
-    ds, means, stds = util.dataset_from_dataframe(df, normalize=False, delays=delays, inputs=inputs, outputs=outputs, verbosity=verbosity)
+    ds, means, stds = util.dataset_from_dataframe(df, normalize=normalize, delays=delays, inputs=inputs, outputs=outputs, verbosity=verbosity)
     nn = util.ann_from_ds(ds, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds, verbosity=verbosity)
     training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
-    return trainer, means, stds
+    return trainer, means, stds, df.index
 
 
-def weather_tomorrow(location='Camas, WA'):
+def weather_today(location='Camas, WA',
+    inputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level PressureIn', 'Mean Sea Level PressureIn', 'Min Sea Level PressureIn', 'WindDirDegrees'], 
+    outputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'],
+    ):
     """ Provide a weather forecast for tomorrow based on historical weather at that location """
-    trainer = train_weather_predictor(location,
+
+    trainer, means, std, dates = train_weather_predictor(location,
         years=10, delays=(1,2,3,4),
-        inputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level PressureIn', 'Mean Sea Level PressureIn', 'Min Sea Level PressureIn', 'WindDirDegrees'], 
-        outputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'],
-        epochs=300,
+        inputs=inputs,
+        outputs=outputs,
+        normalize=False,
+        epochs=100,
         verbosity=1
         )
     nn = trainer.module
-    return nn
-
-
-
+    ds = trainer.ds
+    forecast = {dates[-1]: dict(zip(outputs, nn.activate(ds['input'][-1])))}
+    forecast['trainer'] = trainer
+    return forecast
 
 
 def thermostat(

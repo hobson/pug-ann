@@ -98,7 +98,8 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Sigmoid',
 def ann_from_ds(ds=None, N_input=3, N_hidden=0, N_output=1, verbosity=1):
     N_input = getattr(ds, 'indim', N_input)
     N_output = getattr(ds, 'outdim', N_output)
-    N_hidden = getattr(ds, 'paramdim', N_hidden + N_input + N_output) - N_hidden - N_output
+    N_hidden = N_hidden or getattr(ds, 'paramdim', N_hidden + N_input + N_output) - N_input - N_output
+    N_hidden = max(round(min(N_hidden, len(ds) / float(N_input) / float(N_output) / 5.)), N_output)
 
     return build_ann(N_input=N_input, N_hidden=N_hidden, N_output=N_output, verbosity=verbosity)
 
@@ -142,7 +143,7 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], 
         print("Dataset dimensions are {}x{}".format(ds.indim, ds.outdim))
     for i, out_vec in enumerate(df[outputs].values):
         if verbosity > 1:
-            print(i, out_vec)
+            print('sample[{i}].target={out_vec}'.format(i=i, out_vec=out_vec))
         if i < max(delays):
             continue
         inp_vec = []
