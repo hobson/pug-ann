@@ -64,7 +64,7 @@ def train_weather_predictor(
     ds = util.dataset_from_dataframe(df, normalize=False, delays=delays, inputs=inputs, outputs=outputs, include_last=False, verbosity=verbosity)
     nn = util.ann_from_ds(ds, N_hidden=N_hidden, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds=ds, verbosity=verbosity)
-    training_err, validation_err = trainer.trainEpochs(epochs, verbose=bool(verbosity))
+    training_err, validation_err = trainer.trainEpochs(epochs)
     return trainer
 
 
