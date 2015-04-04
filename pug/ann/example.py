@@ -10,6 +10,7 @@ Examples:
     (<RPropMinusTrainer 'RPropMinusTrainer-8'>, array([ 0.,  0.,  0.,  0.,  0.,  0.]), array([ 1.,  1.,  1.,  1.,  1.,  1.]))
 """
 
+import datetime
 from pug.ann.data import weather
 from pug.ann import util
 
@@ -51,27 +52,32 @@ def train_weather_predictor(
     nn = util.ann_from_ds(ds, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds, verbosity=verbosity)
     training_err, validation_err = trainer.trainUntilConvergence(maxEpochs=epochs, verbose=bool(verbosity))
-    return trainer, means, stds, df.index
+    return trainer, means, stds, df
 
 
-def weather_today(location='Camas, WA',
+def oneday_weather_forecast(location='Camas, WA',
     inputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level PressureIn', 'Mean Sea Level PressureIn', 'Min Sea Level PressureIn', 'WindDirDegrees'], 
     outputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'],
+    date=None
     ):
     """ Provide a weather forecast for tomorrow based on historical weather at that location """
-
-    trainer, means, std, dates = train_weather_predictor(location,
-        years=10, delays=(1,2,3,4),
+    date = date or datetime.datetime.now().date()
+    trainer, means, std, historical_weather = train_weather_predictor(location,
+        years=range(date.year-10, date.year), delays=(1,2,3,4),
         inputs=inputs,
         outputs=outputs,
         normalize=False,
-        epochs=100,
+        epochs=70,
         verbosity=1
         )
     nn = trainer.module
     ds = trainer.ds
-    forecast = {dates[-1]: dict(zip(outputs, nn.activate(ds['input'][-1])))}
+    today = historical_weather.index.iloc[-1].date()
+    forecast = {today: dict(zip(outputs, nn.activate(ds['input'][-1])))}
     forecast['trainer'] = trainer
+    forecast['historical_weather'] = historical_weather
+    
+    forecast[date + datetime.timedelta(1)] = dict(zip(outputs, nn.activate(ds['input'][-1])))
     return forecast
 
 

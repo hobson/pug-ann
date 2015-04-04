@@ -104,7 +104,7 @@ def ann_from_ds(ds=None, N_input=3, N_hidden=0, N_output=1, verbosity=1):
     return build_ann(N_input=N_input, N_hidden=N_hidden, N_output=N_output, verbosity=verbosity)
 
 
-def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], normalize=True, verbosity=1):
+def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], normalize=True, include_last=True, verbosity=1):
     """Compose a pybrain.dataset from a pandas DataFrame
 
     Arguments:
@@ -150,6 +150,13 @@ def dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=[-1], 
         for delay in delays:
             inp_vec += list((df[inputs].values[i-delay] - means[:N_inp]) / stds[:N_inp])
         ds.addSample(inp_vec, (out_vec - means[N_inp:]) / stds[N_inp:])
+    if include_last:
+        inp_vec = []
+        i = len(df)
+        for delay in delays:
+            inp_vec += list((df[inputs].values[i-delay] - means[:N_inp]) / stds[:N_inp])
+        # set the output to vector of NaNs for the last sample
+        ds.addSample(inp_vec, float('nan') * np.ones(N_out))
     if verbosity > 0:
         print("Dataset now has {} samples".format(len(ds)))
     return ds, means, stds
