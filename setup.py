@@ -38,7 +38,9 @@ try:
 except:  # (IOError, ImportError, OSError, RuntimeError):
     print('WARNING: Unable to find or read README.rst.')
 
-dependency_links = [] #  ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master'] 
+dependency_links = [
+  'http://github.com/hobson/pybrain/tarball/master#egg=pybrain-0.3.3',
+] #  ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master'] 
 EXCLUDE_FROM_PACKAGES = []
 
 print('Installing package named {} from the {} project. . .'.format(package_name, project_name))
