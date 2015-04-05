@@ -91,8 +91,8 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, use_cac
             elif verbosity >= 0:
                 msg = "The number of columns in the 1st row of the table:\n    {}\n    doesn't match the number of column labels:\n    {}\n".format(
                     table[0], columns)
-                msg += "Wunderground.com probably can't find the airport: {}\n    or the date: {}\n    in its database.\n".format(
-                    airport_code, day)
+                msg += "Wunderground.com probably can't find the airport: {} ({})\n    or the date: {}\n    in its database.\n".format(
+                    airport_code, location, day)
                 msg += "Attempted a GET request using the URI:\n    {0}\n".format(url)
                 warnings.warn(msg)
     try:
@@ -192,32 +192,32 @@ def daily(location='Fresno, CA', years=1, use_cache=True, verbosity=1):
             M = (buf.count(',') + N) / float(N)
             print('Retrieved CSV for airport code "{}" with appox. {} lines and {} columns = {} cells.'.format(
                   airport_code, N, int(round(M)), int(round(M)) * N))
-
+            if verbosity > 2:
+                print(buf)
         table = util.read_csv(buf, format='header+values-list', numbers=True)
         # # clean up the last column (if it contains <br> tags)
-        # table = [row[:-1] + [re.sub(r'\s*<br\s*[/]?>\s*$','', row[-1])] for row in table]
+        table = [util.strip_br(row) if len(row) > 1 else row for row in table]
         # numcols = max(len(row) for row in table)
         # table = [row for row in table if len(row) == numcols]
         columns = table.pop(0)
         tzs = [s for s in columns if (s[1:] in ['ST', 'DT'] and s[0] in 'PMCE')]
         dates = [float('nan')] * len(table)
         for i, row in enumerate(table):
-            for j, col in enumerate(row):
-                if not col and col != None:
-                    col = 0
+            for j, value in enumerate(row):
+                if not value and value != None:
+                    value = 0
                     continue
                 if columns[j] in tzs:
-                    table[i][j] = util.make_tz_aware(col, tz=columns[j])
+                    table[i][j] = util.make_tz_aware(value, tz=columns[j])
                     if isinstance(table[i][j], datetime.datetime):
                         dates[i] = table[i][j]
                         continue
                 try:
-                    table[i][j] = int(col)
+                    table[i][j] = float(value)
+                    if not (table[i][j] % 1):
+                        table[i][j] = int(table[i][j])
                 except:
-                    try:
-                        table[i][j] = float(col)
-                    except:
-                        pass
+                    pass
         df0 = pd.DataFrame(table, columns=columns, index=dates)
         df = df.append(df0)
 
