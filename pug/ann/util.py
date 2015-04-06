@@ -46,7 +46,7 @@ def normalize_layer_type(layer_type):
     return [normalize_layer_type(lt) for lt in layer_type]
 
 
-def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Sigmoid', verbosity=1):
+def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', verbosity=1):
     """Build a neural net with the indicated input, hidden, and outout dimensions
 
     Arguments:
@@ -104,7 +104,7 @@ def ann_from_ds(ds=None, N_input=3, N_hidden=0, N_output=1, verbosity=1):
     return build_ann(N_input=N_input, N_hidden=N_hidden, N_output=N_output, verbosity=verbosity)
 
 
-def dataset_from_dataframe(df, delays=(1,2,3), inputs=(1, 2, -1), outputs=(-1,), normalize=True, include_last=False, verbosity=1):
+def dataset_from_dataframe(df, delays=(1,2,3), inputs=(1, 2, -1), outputs=(-1,), normalize=False, include_last=False, verbosity=1):
     """Compose a pybrain.dataset from a pandas DataFrame
 
     Arguments:
