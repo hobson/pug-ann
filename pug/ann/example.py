@@ -4,9 +4,15 @@ Installation:
 
     pip install pug-ann
 
-Examples:
 
-    >>> trainer = train_weather_predictor('San Francisco, CA', epochs=2, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2014,2015), delays=(1,), use_cache=True, verbosity=0)
+FIXME:
+    Mysterious bug in pybrain on my maze__init__ and master branches.
+    NN.activate() returns the exact same vector on each run with different inputs, 
+    unless the FFNetwork.reset() call is commented out.
+    Have to train it for more than 10 iterations for this to happen.
+
+Examples:
+    >>> trainer = train_weather_predictor('San Francisco, CA', epochs=2, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2013,2015), delays=(1,), use_cache=True, verbosity=0)
     >>> all(trainer.module.activate(trainer.ds['input'][0]) == trainer.module.activate(trainer.ds['input'][1]))
     False
     >>> len(trainer.trainUntilConvergence(maxEpochs=2)[0])
