@@ -15,8 +15,9 @@ Examples:
     >>> trainer = train_weather_predictor('San Francisco, CA', epochs=2, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2013,2015), delays=(1,), use_cache=True, verbosity=0)
     >>> all(trainer.module.activate(trainer.ds['input'][0]) == trainer.module.activate(trainer.ds['input'][1]))
     False
-    >>> len(trainer.trainUntilConvergence(maxEpochs=2)[0])
-    2
+    >>> trainer.trainEpochs(5)
+
+    Make sure NN hasn't saturated (as it might for a sigmoid hidden layer)
     >>> all(trainer.module.activate(trainer.ds['input'][0]) == trainer.module.activate(trainer.ds['input'][1]))
     False
 """
@@ -29,7 +30,7 @@ from pug.nlp.util import make_date, update_dict
 
 def train_weather_predictor(
             location='Camas, WA',
-            years=range(2012, 2015),
+            years=range(2013, 2016),
             delays=[1,2,3], 
             inputs=['Min TemperatureF', 'Max TemperatureF', 'Min Sea Level PressureIn', u'Max Sea Level PressureIn', 'WindDirDegrees'], 
             outputs=[u'Max TemperatureF'],
@@ -73,9 +74,9 @@ def oneday_weather_forecast(location='Camas, WA',
     inputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level PressureIn', 'Mean Sea Level PressureIn', 'Min Sea Level PressureIn', 'WindDirDegrees'], 
     outputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'],
     date=None,
-    epochs=70,
+    epochs=200,
     delays=(1,2,3,4),
-    num_years=10,
+    num_years=4,
     use_cache=False,
     verbosity=1
     ):
@@ -84,7 +85,7 @@ def oneday_weather_forecast(location='Camas, WA',
     num_years = int(num_years or 10)
     years = range(date.year - num_years, date.year + 1)
     df = weather.daily(location, years=years, use_cache=use_cache, verbosity=verbosity).sort()
-    # because up-to-date weather history has not been cached, can use that cache, regardless of use_cache kwarg
+    # because up-to-date weather history was cached above, can use that cache, regardless of use_cache kwarg
     trainer = train_weather_predictor(location,
         years=years,
         delays=delays,
