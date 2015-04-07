@@ -128,7 +128,7 @@ def prepend_dataset_with_weather(samples, location='Fresno, CA', weather_columns
     if verbosity > 1:
         print('Retrieved weather for years {}:'.format(years))
         print(weather_df)
-    weather_columns =  [label if label in weather_df.columns else weather_df.columns[int(label)] for label in weather_columns] 
+    weather_columns =  [label if label in weather_df.columns else weather_df.columns[int(label)] for label in (weather_columns or [])] 
     for sampnum, sample in enumerate(samples):
         timestamp = timestamps[sampnum]
         try:
@@ -145,6 +145,86 @@ def prepend_dataset_with_weather(samples, location='Fresno, CA', weather_columns
             warnings.warn('Unable to find weather features {} in the weather for date {}'.format(
                 [label for i, label in enumerate(weather_columns) if sample['input'][i] == NaN], timestamp))
     return samples
+
+
+def dataset_from_features(df, delays=(1,2,), quantiles=(), input_columns=(0,), target_columns=(-1,), weather_columns=(), features=(), verbosity=1):
+        # Compute the length of extra features added on to the vector from the rolling window of previous threshold values
+    extras = (+ int('dow' in features) * 7
+              + int('moy' in features) * 12
+              + int('woy' in features)
+              + int('date' in features)
+              + len(quantiles)
+              + len(weather_columns)
+              )
+
+    N = max(list(delays) + list(quantiles))
+    last_date = first_date = 0
+    try:
+        if verbosity > 0:
+            print('The total input vector length (dimension) is now {0}'.format(len(N) + extras))
+            print('Starting to augment {0}x{1} sample inputs by adding adding {2} additional features'.format(
+                len(df), len(input_columns), extras))
+        if verbosity > 0:
+            print('The first sample input was {0}'.format(
+                df[input_columns].iloc[0]))
+            print('The first sample target was {0}'.format(
+                df[target_columns].iloc[0]))
+            print('The last sample input was {0}'.format(
+                df[input_columns].iloc[-1]))
+            print('The last sample target was {0}'.format(
+                df[target_columns].iloc[-1]))   
+        first_date = df.index.iloc[0].date().toordinal()
+        last_date  = df.index.iloc[-1].date().toordinal()
+    except:
+        if verbosity > -1:
+            from traceback import format_exc
+            warnings.warn(format_exc())
+        if verbosity > 1:
+            import ipdb; ipdb.set_trace()
+    date_range = (last_date - first_date) + 1 or 1
+
+    # FIXME: scale each feature/column/dimension independently using pug.ann.util.dataset_from_dataframe
+    #        but mean and std become vectors of the same dimension as the feature/input vector
+    bit_scale = 5  # number of standard deviations for the magnitude of bit            
+
+    # convert the list of dicts ((input, output) supervised dataset pairs) into a pybrains.Dataset
+    ds = pybrain.datasets.SupervisedDataSet(len(N) + extras, 1)
+    for sampnum, (input_vector, target_vector) in enumerate(zip(df[input_columns].values, df[output_columns].values)):
+        # sample['input'] and ['output'] are pd.Series tables so convert them to normal list()
+        inputs = list(sample['input'])
+
+        # the date we're trying to predict the rhreshold for
+        timestamp = sample['target'].index[0]
+        for feature_name in sorted_features:
+            if feature_name.startswith('morn'):
+                day = get_day(series, date=timestamp.date())
+                morning_loads = (day.values[:morn] - mean) / std
+                if verbosity > 2:
+                    print('day = {0} and morning = {1}'.format(len(day), len(morning_loads)))
+                inputs = list(morning_loads) + inputs
+            elif feature_name == 'dow':
+                dow_bits = [0] * 7
+                dow_bits[timestamp.weekday()] = bit_scale
+                inputs = dow_bits + inputs
+            elif feature_name == 'moy':
+                moy_bits = [0] * 12
+                moy_bits[timestamp.month - 1] = bit_scale
+                inputs = moy_bits + inputs
+            elif feature_name == 'woy':
+                inputs = [(timestamp.weekofyear - 26.) * 3 * bit_scale / 52] + inputs
+            elif feature_name == 'date':
+                inputs = [(timestamp.date().toordinal() - first_date - date_range / 2.) * 3 * bit_scale / date_range ] + inputs
+
+            if pd.isnull(inputs).any():
+                msg = 'Feature "{0}" within the feature list: {1} created null/NaN input values\nFor sample {2} and date {3}\nInput vector positions {4}:\nInput vector: {5}'.format(
+                    feature_name, sorted_features, sampnum, timestamp, ann.table_nan_locs(inputs), inputs)
+                msg += '\nBuilding load Series:\n{0}\n'.format(series)
+                if ignore_nans:
+                    warnings.warn(msg)
+                else:
+                    raise ValueError(msg)
+
+        ds.addSample(inputs, list(sample['target'].values))
 
 
 def dataset_from_dataframe(df, delays=(1,2,3), inputs=(1, 2, -1), outputs=(-1,), normalize=False, include_last=False, verbosity=1):
