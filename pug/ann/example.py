@@ -5,12 +5,6 @@ Installation:
     pip install pug-ann
 
 
-FIXME:
-    Mysterious bug in pybrain on my maze__init__ and master branches.
-    NN.activate() returns the exact same vector on each run with different inputs, 
-    unless the FFNetwork.reset() call is commented out.
-    Have to train it for more than 10 iterations for this to happen.
-
 Examples:
     >>> trainer = train_weather_predictor('San Francisco, CA', epochs=2, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2013,2015), delays=(1,), use_cache=True, verbosity=0)
     >>> all(trainer.module.activate(trainer.ds['input'][0]) == trainer.module.activate(trainer.ds['input'][1]))
@@ -29,37 +23,38 @@ from pug.nlp.util import make_date, update_dict
 
 
 def train_weather_predictor(
-            location='Camas, WA',
-            years=range(2013, 2016),
-            delays=[1,2,3], 
-            inputs=['Min TemperatureF', 'Max TemperatureF', 'Min Sea Level PressureIn', u'Max Sea Level PressureIn', 'WindDirDegrees'], 
-            outputs=[u'Max TemperatureF'],
-            N_hidden=6,
-            epochs=30,
-            use_cache=False,
-            verbosity=2):
-    """Predict the weather for tomorrow based on the weather for the past few days
+        location='Camas, WA',
+        years=range(2013, 2016,),
+        delays=(1, 2, 3),
+        inputs=('Min TemperatureF', 'Max TemperatureF', 'Min Sea Level PressureIn', u'Max Sea Level PressureIn', 'WindDirDegrees',),
+        outputs=(u'Max TemperatureF',),
+        N_hidden=6,
+        epochs=30,
+        use_cache=False,
+        verbosity=2,
+        ):
+    """Train a neural nerual net to predict the weather for tomorrow based on past weather.
 
-    Builds a linear single-layer neural net (multi-dimensional regression).
-    The dataset is a basic SupervisedDataSet rather than a SequentialDataSet, so there may be
-    "accuracy left on the table" or even "cheating" during training, because training and test
-    set are selected randomly so historical data for one sample is used as target (furture data)
-    for other samples.
+    Builds a linear single hidden layer neural net (multi-dimensional nonlinear regression).
+    The dataset is a basic SupervisedDataSet rather than a SequentialDataSet, so the training set
+    and the test set are sampled randomly. This means that historical data for one sample (the delayed
+    input vector) will likely be used as the target for other samples.
 
-    Uses CSVs scraped from wunderground (no api key required) to get daily weather for the years indicated.
+    Uses CSVs scraped from wunderground (without an api key) to get daily weather for the years indicated.
 
     Arguments:
-        location (str): City and state in standard US postal service format: "City, ST" or an airport code like "PDX"
-        delays (list of int): sample delays to use for the input tapped delay line.
-            Positive and negative values are treated the same as sample counts into the past.
-            default: [1, 2, 3], in z-transform notation: z^-1 + z^-2 + z^-3
-        years (int or list of int): list of 4-digit years to download weather from wunderground
-        inputs (list of int or list of str): column indices or labels for the inputs
-        outputs (list of int or list of str): column indices or labels for the outputs
+      location (str): City and state in standard US postal service format: "City, ST"
+          alternatively an airport code like "PDX or LAX"
+      delays (list of int): sample delays to use for the input tapped delay line.
+          Positive and negative values are treated the same as sample counts into the past.
+          default: [1, 2, 3], in z-transform notation: z^-1 + z^-2 + z^-3
+      years (int or list of int): list of 4-digit years to download weather from wunderground
+      inputs (list of int or list of str): column indices or labels for the inputs
+      outputs (list of int or list of str): column indices or labels for the outputs
 
     Returns:
-        3-tuple: tuple(dataset, list of means, list of stds)
-            means and stds allow normalization of new inputs and denormalization of the outputs
+      3-tuple: tuple(dataset, list of means, list of stds)
+          means and stds allow normalization of new inputs and denormalization of the outputs
 
     """
     df = weather.daily(location, years=years, use_cache=use_cache, verbosity=verbosity).sort()
@@ -131,21 +126,28 @@ def thermostat(
     Uses CSVs scraped from wunderground (no api key required) to get daily weather for the years indicated.
 
     Arguments:
-        location (str): City and state in standard US postal service format: "City, ST" or an airport code like "PDX"
-        days (int): Number of days of weather data to download from wunderground
-        delays (list of int): sample delays to use for the input tapped delay line.
-            Positive and negative values are treated the same as sample counts into the past.
-            default: [1, 2, 3], in z-transform notation: z^-1 + z^-2 + z^-3
-        years (int or list of int): list of 4-digit years to download weather from wunderground
-        inputs (list of int or list of str): column indices or labels for the inputs
-        outputs (list of int or list of str): column indices or labels for the outputs
+      location (str): City and state in standard US postal service format: "City, ST" or an airport code like "PDX"
+      days (int): Number of days of weather data to download from wunderground
+      delays (list of int): sample delays to use for the input tapped delay line.
+        Positive and negative values are treated the same as sample counts into the past.
+        default: [1, 2, 3], in z-transform notation: z^-1 + z^-2 + z^-3
+      years (int or list of int): list of 4-digit years to download weather from wunderground
+      inputs (list of int or list of str): column indices or labels for the inputs
+      outputs (list of int or list of str): column indices or labels for the outputs
 
     Returns:
-        3-tuple: tuple(dataset, list of means, list of stds)
-            means and stds allow normalization of new inputs and denormalization of the outputs
+      3-tuple: tuple(dataset, list of means, list of stds)
+          means and stds allow normalization of new inputs and denormalization of the outputs
 
     """
     pass
+
+
+#################################################################
+## An online (reinforcement) learning example based on the 
+## cart pole-balancing example in pybrian
+## WIP to perform optimal control of Building HVAC system
+## with limited electrical or thermal energy resource that is recharged every day
 
 
 from pybrain.rl.environments import EpisodicTask
@@ -271,7 +273,6 @@ def run_competition(builders=[], task=BalanceTask(), Optimizer=HillClimber, roun
         print('And the winner for performance is ... Algorithm #{} (0-offset array index [{}])'.format(perfi+1, perfi))
         print('And the winner for speed is ...       Algorithm #{} (0-offset array index [{}])'.format(speedi+1,speedi))
 
-
     return results, means
 
 try:
@@ -330,8 +331,8 @@ try:
 except ImportError:
     pass
 
-import sys
 
 if __name__ == '__main__':
+    import sys
     print(run_competition(verbosity=0))
     sys.exit(0)
