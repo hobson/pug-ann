@@ -65,23 +65,25 @@ def train_weather_predictor(
     return trainer
 
 
-def oneday_weather_forecast(location='Camas, WA',
-    inputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level PressureIn', 'Mean Sea Level PressureIn', 'Min Sea Level PressureIn', 'WindDirDegrees'], 
-    outputs=['Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'],
-    date=None,
-    epochs=200,
-    delays=(1,2,3,4),
-    num_years=4,
-    use_cache=False,
-    verbosity=1
-    ):
+def oneday_weather_forecast(
+        location='Portland, OR',
+        inputs=('Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level PressureIn', 'Mean Sea Level PressureIn', 'Min Sea Level PressureIn', 'WindDirDegrees'),
+        outputs=('Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'),
+        date=None,
+        epochs=200,
+        delays=(1, 2, 3, 4),
+        num_years=4,
+        use_cache=False,
+        verbosity=1,
+        ):
     """ Provide a weather forecast for tomorrow based on historical weather at that location """
     date = make_date(date or datetime.datetime.now().date())
     num_years = int(num_years or 10)
     years = range(date.year - num_years, date.year + 1)
     df = weather.daily(location, years=years, use_cache=use_cache, verbosity=verbosity).sort()
     # because up-to-date weather history was cached above, can use that cache, regardless of use_cache kwarg
-    trainer = train_weather_predictor(location,
+    trainer = train_weather_predictor(
+        location,
         years=years,
         delays=delays,
         inputs=inputs,
@@ -94,24 +96,24 @@ def oneday_weather_forecast(location='Camas, WA',
     forecast = {'trainer': trainer}
 
     yesterday = dict(zip(outputs, nn.activate(trainer.ds['input'][-2])))
-    forecast['yesterday'] = update_dict(yesterday, { 'date': df.index[-2].date() })
+    forecast['yesterday'] = update_dict(yesterday, {'date': df.index[-2].date()})
 
     today = dict(zip(outputs, nn.activate(trainer.ds['input'][-1])))
-    forecast['today'] = update_dict(today, { 'date': df.index[-1].date() })
+    forecast['today'] = update_dict(today, {'date': df.index[-1].date()})
 
     ds = util.input_dataset_from_dataframe(df[-max(delays):], delays=delays, inputs=inputs, normalize=False, verbosity=0)
     tomorrow = dict(zip(outputs, nn.activate(ds['input'][-1])))
-    forecast['tomorrow'] = update_dict(tomorrow, { 'date': (df.index[-1] + datetime.timedelta(1)).date() })
+    forecast['tomorrow'] = update_dict(tomorrow, {'date': (df.index[-1] + datetime.timedelta(1)).date()})
 
     return forecast
 
 
 def thermostat(
-    location='Camas, WA',
-    days=100,
-    capacity=1000,
-    max_eval=1000,  
-    ):
+        location='Camas, WA',
+        days=100,
+        capacity=1000,
+        max_eval=1000,
+        ):
     """ Control the thermostat on an AirCon system with finite thermal energy capacity (chiller)
 
     Useful for controlling a chiller (something that can cool down overnight and heat up during the
@@ -143,16 +145,58 @@ def thermostat(
     pass
 
 
+def explore_maze():
+    # simplified version of the reinforcement learning tutorial example
+    structure = [
+        list('!!!!!!!!!!'),
+        list('! !  ! ! !'),
+        list('! !! ! ! !'),
+        list('!    !   !'),
+        list('! !!!!!! !'),
+        list('! ! !    !'),
+        list('! ! !!!! !'),
+        list('!        !'),
+        list('! !!!!!  !'),
+        list('!   !    !'),
+        list('!!!!!!!!!!'),
+        ]
+    structure = np.array([[ord(c)-ord(' ') for c in row] for row in structure])
+    shape = np.array(structure.shape)
+    environment = Maze(structure,  tuple(shape - 2))
+    controller = ActionValueTable(shape.prod(), 4)
+    controller.initialize(1.)
+    learner = Q()
+    agent = LearningAgent(controller, learner)
+    task = MDPMazeTask(environment)
+    experiment = Experiment(task, agent)
+
+    for i in range(30):
+        experiment.doInteractions(30)
+        agent.learn()
+        agent.reset()
+
+    controller.params.reshape(shape.prod(), 4).max(1).reshape(*shape)
+    # (0, 0) is upper left and (0, N) is upper right, so flip matrix upside down to match NESW action order
+    greedy_policy = np.argmax(controller.params.reshape(shape.prod(), 4), 1)
+    greedy_policy = np.flipud(np.array(list('NESW'))[greedy_policy].reshape(shape))
+    maze = np.flipud(np.array(list(' #'))[structure])
+    print('Maze map:')
+    print('\n'.join(''.join(row) for row in maze))
+    print('Greedy policy:')
+    print('\n'.join(''.join(row) for row in greedy_policy))
+    assert '\n'.join(''.join(row) for row in greedy_policy) == 'NNNNN\nNSNNN\nNSNNN\nNEENN\nNNNNN'
+
+
 #################################################################
-## An online (reinforcement) learning example based on the 
+## An online (reinforcement) learning example based on the
 ## cart pole-balancing example in pybrian
 ## WIP to perform optimal control of Building HVAC system
 ## with limited electrical or thermal energy resource that is recharged every day
 
-
 from pybrain.rl.environments import EpisodicTask
 from pybrain.rl.environments.cartpole import CartPoleEnvironment
 from pybrain.rl.environments.cartpole.nonmarkovpole import NonMarkovPoleEnvironment
+
 
 class BalanceTask(EpisodicTask):
     """ The task of balancing some pole(s) on a cart """
@@ -164,7 +208,7 @@ class BalanceTask(EpisodicTask):
         self.location = location
         self.airport_code = weather.airport(location)
         self.desiredValue = desiredValue
-        if env == None:
+        if env is None:
             env = CartPoleEnvironment()
         EpisodicTask.__init__(self, env)
         self.N = maxsteps
@@ -224,6 +268,7 @@ from pybrain.optimization.hillclimber import HillClimber
 import time
 import numpy as np
 
+
 def run_competition(builders=[], task=BalanceTask(), Optimizer=HillClimber, rounds=3, max_eval=20, N_hidden=3, verbosity=0):
     """ pybrain buildNetwork builds a subtly different network than build_ann... so compete them!
 
@@ -239,7 +284,7 @@ def run_competition(builders=[], task=BalanceTask(), Optimizer=HillClimber, roun
     for r in range(rounds):
         heat = []
 
-        # FIXME: shuffle the order of the builders to keep things fair 
+        # FIXME: shuffle the order of the builders to keep things fair
         #        (like switching sides of the tennis court)
         for builder in builders:
             try:
@@ -258,7 +303,6 @@ def run_competition(builders=[], task=BalanceTask(), Optimizer=HillClimber, roun
         if verbosity >= 0:
             print([competitor_scores[:2] for competitor_scores in heat])
 
-
     # # alternatively:
     # agent = ( pybrain.rl.agents.OptimizationAgent(net, HillClimber())
     #             or
@@ -271,7 +315,7 @@ def run_competition(builders=[], task=BalanceTask(), Optimizer=HillClimber, roun
         print(means)
         perfi, speedi = np.argmax(means[0]), np.argmin(means[1])
         print('And the winner for performance is ... Algorithm #{} (0-offset array index [{}])'.format(perfi+1, perfi))
-        print('And the winner for speed is ...       Algorithm #{} (0-offset array index [{}])'.format(speedi+1,speedi))
+        print('And the winner for speed is ...       Algorithm #{} (0-offset array index [{}])'.format(speedi+1, speedi))
 
     return results, means
 
@@ -285,21 +329,25 @@ try:
     # from pybrain.rl.environments import Task
     import pylab
 
-
     def maze():
         # import sys, time
         pylab.gray()
         pylab.ion()
         # The goal appears to be in the upper right
-        structure = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1],
-                           [1, 0, 0, 1, 0, 0, 0, 0, 1],
-                           [1, 0, 0, 1, 0, 0, 1, 0, 1],
-                           [1, 0, 0, 1, 0, 0, 1, 0, 1],
-                           [1, 0, 0, 1, 0, 1, 1, 0, 1],
-                           [1, 0, 0, 0, 0, 0, 1, 0, 1],
-                           [1, 1, 1, 1, 1, 1, 1, 0, 1],
-                           [1, 0, 0, 0, 0, 0, 0, 0, 1],
-                           [1, 1, 1, 1, 1, 1, 1, 1, 1]])
+        structure = [
+            '!!!!!!!!!!',
+            '! !  ! ! !',
+            '! !! ! ! !',
+            '!    !   !',
+            '! !!!!!! !',
+            '! ! !    !',
+            '! ! !!!! !',
+            '!        !',
+            '! !!!!!  !',
+            '!   !    !',
+            '!!!!!!!!!!',
+            ]
+        structure = np.array([[ord(c)-ord(' ') for c in row] for row in structure])
         shape = np.array(structure.shape)
         environment = Maze(structure, tuple(shape - 2))
         controller = ActionValueTable(shape.prod(), 4)
@@ -315,11 +363,11 @@ try:
             agent.reset()
             # 4 actions, 81 locations/states (9x9 grid)
             # max(1) gives/plots the biggest objective function value for that square
-            pylab.pcolor(controller.params.reshape(81,4).max(1).reshape(9,9))
+            pylab.pcolor(controller.params.reshape(81, 4).max(1).reshape(9, 9))
             pylab.draw()
 
-        # (0, 0) is upper left and (0, N) is upper right, so flip matrix upside down to match NESW action order 
-        greedy_policy = np.argmax(controller.params.reshape(shape.prod(), 4),1)
+        # (0, 0) is upper left and (0, N) is upper right, so flip matrix upside down to match NESW action order
+        greedy_policy = np.argmax(controller.params.reshape(shape.prod(), 4), 1)
         greedy_policy = np.flipud(np.array(list('NESW'))[greedy_policy].reshape(shape))
         maze = np.flipud(np.array(list(' #'))[structure])
         print('Maze map:')
@@ -327,12 +375,21 @@ try:
         print('Greedy policy:')
         print('\n'.join(''.join(row) for row in greedy_policy))
 
-            # pylab.show()
+        # pylab.show()
 except ImportError:
     pass
 
 
 if __name__ == '__main__':
+    try:
+        explore_maze()
+    except:
+        
     import sys
     print(run_competition(verbosity=0))
     sys.exit(0)
+if __name__ == "__main__":
+    try:
+    except:
+        from traceback import format_exc
+        sys.exit(format_exc())
