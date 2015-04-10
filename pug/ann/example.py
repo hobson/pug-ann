@@ -20,10 +20,12 @@ import datetime
 from pug.ann.data import weather
 from pug.ann import util
 from pug.nlp.util import make_date, update_dict
+from matplotlib import pyplot as plt
+import pandas as pd
 
 
 def train_weather_predictor(
-        location='Camas, WA',
+        location='Portland, OR',
         years=range(2013, 2016,),
         delays=(1, 2, 3),
         inputs=('Min Temperature', 'Max Temperature', 'Min Sea Level Pressure', u'Max Sea Level Pressure', 'WindDirDegrees',),
@@ -62,7 +64,17 @@ def train_weather_predictor(
     nn = util.ann_from_ds(ds, N_hidden=N_hidden, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds=ds, verbosity=verbosity)
     trainer.trainEpochs(epochs)
-    return trainer
+
+    columns = []
+    for delay in delays:
+        columns += [inp + "[-{}]".format(delay) for inp in inputs]
+    columns += list(outputs)
+
+    prediction_labels = ['Predicted {}'.format(outp) for outp in outputs]
+    # df = pd.DataFrame([list(i) + list(t) + list(trainer.module.activate(i)) for i, t in zip(trainer.ds['input'], trainer.ds['target'])], columns=columns + prediction_labels])
+
+    #comparison = df[[] + list(outputs)]
+    return trainer, df
 
 
 def oneday_weather_forecast(
