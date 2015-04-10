@@ -22,7 +22,7 @@ from pybrain.tools.customxml import NetworkReader
 from pybrain.structure.parametercontainer import ParameterContainer
 from pybrain.structure.connections.connection import Connection
 
-from pug.nlp.util import tuplify
+from pug.nlp.util import tuplify, fuzzy_get
 from pug.ann.data import weather
 
 #import pug.nlp.util as nlp
@@ -225,7 +225,7 @@ def dataset_from_features(df, delays=(1, 2,), quantiles=(), input_columns=(0,), 
                 else:
                     raise ValueError(msg)
 
-        ds.addSample(inputs, list(sample['target'].values))
+        ds.addSample(inputs, list(target_vector.values))
 
 
 def dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=(-1,), normalize=False, include_last=False, verbosity=1):
@@ -256,6 +256,9 @@ def dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=(-1,
     delays = np.abs(np.array([int(i) for i in delays]))
     inputs = [df.columns[int(inp)] if isinstance(inp, (float, int)) else str(inp) for inp in inputs]
     outputs = [df.columns[int(out)] if isinstance(out, (float, int)) else str(out) for out in (outputs or [])]
+
+    inputs = [fuzzy_get(df.columns, i) for i in inputs]
+    outputs = [fuzzy_get(df.columns, o) for o in outputs]
 
     N_inp = len(inputs)
     N_out = len(outputs)
