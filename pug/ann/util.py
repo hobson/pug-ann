@@ -9,7 +9,7 @@ import os
 import warnings
 
 import pandas as pd
-from scipy import ndarray, reshape  # array, amin, amax, 
+from scipy import ndarray, reshape  # array, amin, amax,
 np = pd.np
 from matplotlib import pyplot as plt
 import pybrain.datasets
@@ -52,9 +52,9 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', 
     """Build a neural net with the indicated input, hidden, and outout dimensions
 
     Arguments:
-        params (dict or PyBrainParams namedtuple): 
-            default: {'N_hidden': 6}
-            (this is the only parameter that affects the NN build)
+      params (dict or PyBrainParams namedtuple):
+        default: {'N_hidden': 6}
+        (this is the only parameter that affects the NN build)
 
     Returns:
         FeedForwardNetwork with N_input + N_hidden + N_output nodes in 3 layers
@@ -69,7 +69,7 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', 
     hidden_layer_type = tuplify(normalize_layer_type(hidden_layer_type))
 
     if verbosity > 0:
-        print(N_hidden,' layers of type ', hidden_layer_type)
+        print(N_hidden, ' layers of type ', hidden_layer_type)
 
     assert(len(N_hidden) == len(hidden_layer_type))
     nn = pb.structure.FeedForwardNetwork()
@@ -128,7 +128,7 @@ def prepend_dataset_with_weather(samples, location='Fresno, CA', weather_columns
     if verbosity > 1:
         print('Retrieved weather for years {}:'.format(years))
         print(weather_df)
-    weather_columns =  [label if label in weather_df.columns else weather_df.columns[int(label)] for label in (weather_columns or [])] 
+    weather_columns = [label if label in weather_df.columns else weather_df.columns[int(label)] for label in (weather_columns or [])]
     for sampnum, sample in enumerate(samples):
         timestamp = timestamps[sampnum]
         try:
@@ -147,7 +147,7 @@ def prepend_dataset_with_weather(samples, location='Fresno, CA', weather_columns
     return samples
 
 
-def dataset_from_features(df, delays=(1,2,), quantiles=(), input_columns=(0,), target_columns=(-1,), weather_columns=(), features=(), verbosity=1):
+def dataset_from_features(df, delays=(1, 2,), quantiles=(), input_columns=(0,), target_columns=(-1,), weather_columns=(), features=(), verbosity=1):
         # Compute the length of extra features added on to the vector from the rolling window of previous threshold values
     extras = (+ int('dow' in features) * 7
               + int('moy' in features) * 12
@@ -172,29 +172,30 @@ def dataset_from_features(df, delays=(1,2,), quantiles=(), input_columns=(0,), t
             print('The last sample input was {0}'.format(
                 df[input_columns].iloc[-1]))
             print('The last sample target was {0}'.format(
-                df[target_columns].iloc[-1]))   
+                df[target_columns].iloc[-1]))
         first_date = df.index.iloc[0].date().toordinal()
-        last_date  = df.index.iloc[-1].date().toordinal()
+        last_date = df.index.iloc[-1].date().toordinal()
     except:
         if verbosity > -1:
             from traceback import format_exc
             warnings.warn(format_exc())
         if verbosity > 1:
-            import ipdb; ipdb.set_trace()
+            import ipdb
+            ipdb.set_trace()
     date_range = (last_date - first_date) + 1 or 1
 
     # FIXME: scale each feature/column/dimension independently using pug.ann.util.dataset_from_dataframe
     #        but mean and std become vectors of the same dimension as the feature/input vector
-    bit_scale = 5  # number of standard deviations for the magnitude of bit            
+    bit_scale = 5  # number of standard deviations for the magnitude of bit
 
     # convert the list of dicts ((input, output) supervised dataset pairs) into a pybrains.Dataset
     ds = pybrain.datasets.SupervisedDataSet(len(N) + extras, 1)
-    for sampnum, (input_vector, target_vector) in enumerate(zip(df[input_columns].values, df[output_columns].values)):
+    for sampnum, (input_vector, target_vector) in enumerate(zip(df[input_columns].values, df[target_columns].values)):
         # sample['input'] and ['output'] are pd.Series tables so convert them to normal list()
-        inputs = list(sample['input'])
+        # inputs = list(sample['input'])
 
-        # the date we're trying to predict the rhreshold for
-        timestamp = sample['target'].index[0]
+        # the date we're trying to predict the threshold for
+        timestamp = target_vector.index[0]
         for feature_name in sorted_features:
             if feature_name.startswith('morn'):
                 day = get_day(series, date=timestamp.date())
@@ -213,7 +214,7 @@ def dataset_from_features(df, delays=(1,2,), quantiles=(), input_columns=(0,), t
             elif feature_name == 'woy':
                 inputs = [(timestamp.weekofyear - 26.) * 3 * bit_scale / 52] + inputs
             elif feature_name == 'date':
-                inputs = [(timestamp.date().toordinal() - first_date - date_range / 2.) * 3 * bit_scale / date_range ] + inputs
+                inputs = [(timestamp.date().toordinal() - first_date - date_range / 2.) * 3 * bit_scale / date_range] + inputs
 
             if pd.isnull(inputs).any():
                 msg = 'Feature "{0}" within the feature list: {1} created null/NaN input values\nFor sample {2} and date {3}\nInput vector positions {4}:\nInput vector: {5}'.format(
@@ -227,20 +228,20 @@ def dataset_from_features(df, delays=(1,2,), quantiles=(), input_columns=(0,), t
         ds.addSample(inputs, list(sample['target'].values))
 
 
-def dataset_from_dataframe(df, delays=(1,2,3), inputs=(1, 2, -1), outputs=(-1,), normalize=False, include_last=False, verbosity=1):
+def dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=(-1,), normalize=False, include_last=False, verbosity=1):
     """Compose a pybrain.dataset from a pandas DataFrame
 
     Arguments:
-        delays (list of int): sample delays to use for the input tapped delay line
-            Positive and negative values are treated the same as sample counts into the past.
-            default: [1, 2, 3], in z-transform notation: z^-1 + z^-2 + z^-3
-        inputs (list of int or list of str): column indices or labels for the inputs
-        outputs (list of int or list of str): column indices or labels for the outputs
-        normalize (bool): whether to divide each input to be normally distributed about 0 with std 1
+      delays (list of int): sample delays to use for the input tapped delay line
+        Positive and negative values are treated the same as sample counts into the past.
+        default: [1, 2, 3], in z-transform notation: z^-1 + z^-2 + z^-3
+      inputs (list of int or list of str): column indices or labels for the inputs
+      outputs (list of int or list of str): column indices or labels for the outputs
+      normalize (bool): whether to divide each input to be normally distributed about 0 with std 1
 
     Returns:
-        3-tuple: tuple(dataset, list of means, list of stds)
-            means and stds allow normalization of new inputs and denormalization of the outputs
+      3-tuple: tuple(dataset, list of means, list of stds)
+        means and stds allow normalization of new inputs and denormalization of the outputs
 
     TODO:
 
@@ -255,7 +256,6 @@ def dataset_from_dataframe(df, delays=(1,2,3), inputs=(1, 2, -1), outputs=(-1,),
     delays = np.abs(np.array([int(i) for i in delays]))
     inputs = [df.columns[int(inp)] if isinstance(inp, (float, int)) else str(inp) for inp in inputs]
     outputs = [df.columns[int(out)] if isinstance(out, (float, int)) else str(out) for out in (outputs or [])]
-
 
     N_inp = len(inputs)
     N_out = len(outputs)
@@ -297,8 +297,8 @@ def dataset_from_dataframe(df, delays=(1,2,3), inputs=(1, 2, -1), outputs=(-1,),
         return ds
 
 
-def input_dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=None, normalize=True, include_last=True, verbosity=1):
-    """ Build a dataset with an empty output/target vector 
+def input_dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=None, normalize=True, include_last=True, verbosity=1):
+    """ Build a dataset with an empty output/target vector
 
     Identical to `dataset_from_dataframe`, except that default values for 2 arguments:
         outputs: None
@@ -307,8 +307,8 @@ def input_dataset_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=
     return dataset_from_dataframe(df=df, delays=delays, inputs=inputs, outputs=outputs, normalize=normalize, include_last=include_last, verbosity=verbosity)
 
 
-def inputs_from_dataframe(df, delays=[1,2,3], inputs=[1, 2, -1], outputs=None, normalize=True, include_last=True, verbosity=1):
-    """ Build a sequence of vectors suitable for "activation" by a neural net 
+def inputs_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=None, normalize=True, include_last=True, verbosity=1):
+    """ Build a sequence of vectors suitable for "activation" by a neural net
 
     Identical to `dataset_from_dataframe`, except that only the input vectors are
     returned (not a full DataSet instance) and default values for 2 arguments are changed:
@@ -369,7 +369,6 @@ def weight_matrices(nn):
             return [weight_matrices(v) for v in nn]
 
 
-
 # # FIXME: resolve all these NLP dependencies and get this working
 
 # def dataset_from_time_series(df, N_inp=None, features=('moy',), verbosity=1):
@@ -378,7 +377,7 @@ def weight_matrices(nn):
 #     features = features or []
 #     # Add features to input vector in reverse alphabetical order by feature name,
 #     #   so woy will be added first, and date will be added last.
-#     # The order that the feature vectors should appear in the input vector to remain consistent 
+#     # The order that the feature vectors should appear in the input vector to remain consistent
 #     #   and neural net architecture can have structure that anticipates this.
 #     sorted_features = nlp.sort_strings(features, ('dat', 'dow', 'moy', 'dom', 'moy', 'mor'), case_sensitive=False)
 #     if verbosity > 0:
@@ -478,7 +477,6 @@ def weight_matrices(nn):
 #     return ds, mean, std, thresh
 
 
-
 def dataset_nan_locs(ds):
     """
     from http://stackoverflow.com/a/14033137/623735
@@ -563,8 +561,6 @@ def trainer_results(trainer, mean=0, std=1, title='', show=True, save=True):
         3-tuple: (trainer, mean, std), A trainer/dataset along with denormalization info
     """
     return plot_network_results(network=trainer.module, ds=trainer.ds, mean=mean, std=std, title=title, show=show, save=save)
-
-
 
 
 def sim_trainer(trainer, mean=0, std=1):

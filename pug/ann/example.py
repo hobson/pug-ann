@@ -26,7 +26,7 @@ def train_weather_predictor(
         location='Camas, WA',
         years=range(2013, 2016,),
         delays=(1, 2, 3),
-        inputs=('Min TemperatureF', 'Max TemperatureF', 'Min Sea Level PressureIn', u'Max Sea Level PressureIn', 'WindDirDegrees',),
+        inputs=('Min Temperature', 'Max Temperature', 'Min Sea Level Pressure', u'Max Sea Level Pressure', 'WindDirDegrees',),
         outputs=(u'Max TemperatureF',),
         N_hidden=6,
         epochs=30,
@@ -61,7 +61,7 @@ def train_weather_predictor(
     ds = util.dataset_from_dataframe(df, normalize=False, delays=delays, inputs=inputs, outputs=outputs, include_last=False, verbosity=verbosity)
     nn = util.ann_from_ds(ds, N_hidden=N_hidden, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds=ds, verbosity=verbosity)
-    results = trainer.trainEpochs(epochs)
+    trainer.trainEpochs(epochs)
     return trainer
 
 
@@ -270,13 +270,26 @@ import numpy as np
 
 
 def run_competition(builders=[], task=BalanceTask(), Optimizer=HillClimber, rounds=3, max_eval=20, N_hidden=3, verbosity=0):
-    """ pybrain buildNetwork builds a subtly different network than build_ann... so compete them!
+    """ pybrain buildNetwork builds a subtly different network structhan build_ann... so compete them!
 
-    buildNetwork connects the bias to the output
-    build_ann does not
+    Arguments:
+        task (Task): task to compete at
+        Optimizer (class): pybrain.Optimizer class to instantiate for each competitor
+        rounds (int): number of times to run the competition
+        max_eval (int): number of objective function evaluations that the optimizer is allowed
+          in each round
+        N_hidden (int): number of hidden nodes in each network being competed
 
-    build_ann allows heterogeneous layer types but the output layer is always linear
-    buildNetwork allows specification of the output layer type
+    The functional difference that I can see is that:
+
+      buildNetwork connects the bias to the output
+      build_ann does not
+
+    The api differences are:
+
+      build_ann allows heterogeneous layer types but the output layer is always linear
+      buildNetwork allows specification of the output layer type
+
     """
     results = []
     builders = list(builders) + [buildNetwork, util.build_ann]
@@ -381,15 +394,13 @@ except ImportError:
 
 
 if __name__ == '__main__':
+    import sys
+
     try:
         explore_maze()
     except:
-        
-    import sys
-    print(run_competition(verbosity=0))
-    sys.exit(0)
-if __name__ == "__main__":
-    try:
-    except:
         from traceback import format_exc
         sys.exit(format_exc())
+
+    print(run_competition(verbosity=0))
+    sys.exit(0)
