@@ -73,7 +73,7 @@ def train_weather_predictor(
 
     columns += ['Predicted {}'.format(outp) for outp in outputs]
     table = [list(i) + list(t) + list(trainer.module.activate(i)) for i, t in zip(trainer.ds['input'], trainer.ds['target'])]
-    df = pd.DataFrame(table, columns=columns)
+    df = pd.DataFrame(table, columns=columns, index=df.index[max(delays):])
 
     #comparison = df[[] + list(outputs)]
     return trainer, df
