@@ -81,8 +81,8 @@ def train_weather_predictor(
 
 def oneday_weather_forecast(
         location='Portland, OR',
-        inputs=('Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level PressureIn', 'Mean Sea Level PressureIn', 'Min Sea Level PressureIn', 'WindDirDegrees'),
-        outputs=('Min TemperatureF', 'Mean TemperatureF', 'Max TemperatureF', 'Max Humidity'),
+        inputs=('Min Temperature', 'Mean Temperature', 'Max Temperature', 'Max Humidity', 'Mean Humidity', 'Min Humidity', 'Max Sea Level Pressure', 'Mean Sea Level Pressure', 'Min Sea Level Pressure', 'Wind Direction'),
+        outputs=('Min Temperature', 'Mean Temperature', 'Max Temperature', 'Max Humidity'),
         date=None,
         epochs=200,
         delays=(1, 2, 3, 4),
@@ -96,7 +96,7 @@ def oneday_weather_forecast(
     years = range(date.year - num_years, date.year + 1)
     df = weather.daily(location, years=years, use_cache=use_cache, verbosity=verbosity).sort()
     # because up-to-date weather history was cached above, can use that cache, regardless of use_cache kwarg
-    trainer = train_weather_predictor(
+    trainer, df = train_weather_predictor(
         location,
         years=years,
         delays=delays,
