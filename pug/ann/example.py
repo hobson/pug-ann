@@ -6,7 +6,8 @@ Installation:
 
 
 Examples:
-    >>> trainer = train_weather_predictor('San Francisco, CA', epochs=2, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2013,2015), delays=(1,), use_cache=True, verbosity=0)
+    In the future DataSets should have an attribute `columns` or `df` to facilitate converting back to dataframes
+    >>> trainer, df = train_weather_predictor('San Francisco, CA', epochs=2, inputs=['Max TemperatureF'], outputs=['Max TemperatureF'], years=range(2013,2015), delays=(1,), use_cache=True, verbosity=0)
     >>> all(trainer.module.activate(trainer.ds['input'][0]) == trainer.module.activate(trainer.ds['input'][1]))
     False
     >>> trainer.trainEpochs(5)
@@ -70,8 +71,9 @@ def train_weather_predictor(
         columns += [inp + "[-{}]".format(delay) for inp in inputs]
     columns += list(outputs)
 
-    prediction_labels = ['Predicted {}'.format(outp) for outp in outputs]
-    # df = pd.DataFrame([list(i) + list(t) + list(trainer.module.activate(i)) for i, t in zip(trainer.ds['input'], trainer.ds['target'])], columns=columns + prediction_labels])
+    columns += ['Predicted {}'.format(outp) for outp in outputs]
+    table = [list(i) + list(t) + list(trainer.module.activate(i)) for i, t in zip(trainer.ds['input'], trainer.ds['target'])]
+    df = pd.DataFrame(table, columns=columns)
 
     #comparison = df[[] + list(outputs)]
     return trainer, df
