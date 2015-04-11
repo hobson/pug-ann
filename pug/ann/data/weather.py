@@ -31,8 +31,8 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, use_cac
     True
     The time zone of the client where this is used to compose the first column label, hence the ellipsis
     >> df.columns  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    Index([u'Time...', u'TemperatureF', u'Dew PointF', u'Humidity', u'Sea Level PressureIn', u'VisibilityMPH', u'Wind Direction', u'Wind SpeedMPH', u'Gust SpeedMPH', u'PrecipitationIn', u'Events', u'Conditions', u'WindDirDegrees', u'DateUTC'], dtype='object')
-    This will fail periodically on Travis, b/c wunderground says "No daily or hourly history data available"
+    Index([u'Time...
+
     >> df = hourly('Fresno, CA', days=5, verbosity=-1)
     >> 24 * 4 <= len(df) <= 24 * (5 + 1) * 2
     True
