@@ -149,44 +149,47 @@
 <div class="sl-block" data-block-type="text" style="width: 800px; left: 80px; top: 6px; height: auto;" data-block-id="5c13e4f876c6c33e28228bb0a9955a6a"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 13;">
 <h1 style="text-align:center"><span style="font-size:48px"><a href="http://pybrain.org" target="_blank">pybrain</a>.<a href="http://pybrain.org/docs/quickstart/dataset.html" target="_blank">Dataset</a> <span style="font-size:32px"><a href="http://pybrain.org/docs/quickstart/dataset.html" target="_blank">pug.ann.util</a>.pybrain_dataset_from_dataframe():</span></span></h1>
 </div></div></section><section>
-<div class="sl-block" data-block-type="code" style="width: 925px; height: 228px; left: 23px; top: 192px;" data-block-id="4d46e7454ca897e63abb87f8be2541e3"><div class="sl-block-content" style="z-index: 11; font-size: 174%;"><pre><code>from pug.ann.example import train_weather_predictor
-trainer, df = train_weather_predictor(
+<div class="sl-block" data-block-type="code" style="width: 925px; height: 250px; left: 23px; top: 192px;" data-block-id="4d46e7454ca897e63abb87f8be2541e3"><div class="sl-block-content" style="z-index: 13; font-size: 174%;"><pre><code>from pug.ann.example import train_weather_predictor
+trainer, dataframe = train_weather_predictor(
         location='PDX',
-        delays=(1,2,3),
+        delays=(1, 2, 3),
         epochs=1000,
-        use_cache=True)
+        use_cache=True,
+        )
 </code></pre></div></div>
-<div class="sl-block" data-block-type="text" style="width: 800px; left: 80px; top: 6px; height: auto;" data-block-id="29f49098c7135e2076d653538ddbb5d6"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 12;">
+<div class="sl-block" data-block-type="text" style="width: 800px; left: 80px; top: 6px; height: auto;" data-block-id="29f49098c7135e2076d653538ddbb5d6"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 14;">
 <h1 style="text-align:center"><span>All together now:</span></h1>
 </div></div>
-<div class="sl-block" data-block-type="code" style="width: 924px; height: 58px; left: 24px; top: 112px;" data-block-id="7f1646c969a58de91d912942d3ca32eb"><div class="sl-block-content" style="z-index: 13; font-size: 174%;"><pre><code>pip install pug-ann</code></pre></div></div>
-<div class="sl-block" data-block-type="code" style="width: 924px; height: 143px; left: 23px; top: 506px;" data-block-id="d1c29b7e562dc49c70dfcc91ecc6ddea"><div class="sl-block-content" style="z-index: 14; font-size: 121%;"><pre><code>epoch    995  total error       5.2621   avg weight         1.008
+<div class="sl-block" data-block-type="code" style="width: 924px; height: 58px; left: 24px; top: 112px;" data-block-id="7f1646c969a58de91d912942d3ca32eb"><div class="sl-block-content" style="z-index: 15; font-size: 174%;"><pre><code>pip install pug-ann</code></pre></div></div>
+<div class="sl-block" data-block-type="code" style="width: 924px; height: 143px; left: 23px; top: 523px;" data-block-id="d1c29b7e562dc49c70dfcc91ecc6ddea"><div class="sl-block-content" style="z-index: 0; font-size: 121%;"><pre><code>epoch    995  total error       5.2621   avg weight         1.008
 epoch    996  total error       5.2555   avg weight         1.008
 epoch    997  total error       5.2483   avg weight         1.008
 epoch    998  total error         5.24   avg weight         1.008
 epoch    999  total error        5.231   avg weight         1.008
 </code></pre></div></div>
-<div class="sl-block" data-block-type="text" data-block-id="a51d611653b539221c8cd1e00a8db362" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 186px; top: 433px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;">
+<div class="sl-block" data-block-type="text" data-block-id="a51d611653b539221c8cd1e00a8db362" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 186px; top: 442px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 16;">
 <h2>5 minutes later...</h2>
 </div></div>
-<div class="sl-block" data-block-type="text" data-block-id="41dc4a586ec1487aad30bd0973850d7a" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 180px; top: 661px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 16;">
-<p>5.2 deg C RMSE</p>
-</div></div></section><section><div class="sl-block" data-block-type="text" style="width: 800px; left: 80px; top: 40px; height: auto;" data-block-id="90fe704aa2bdcf1c55ad40a574edd75d"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Subtitle" style="z-index: 11;">
-<h2>Looks good!</h2>
+<div class="sl-block" data-block-type="text" data-block-id="41dc4a586ec1487aad30bd0973850d7a" style="height: auto; min-width: 30px; min-height: 30px; width: 549px; left: 206px; top: 548px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12; color: rgb(255, 153, 0); background-color: rgba(0, 0, 0, 0);">
+<h2>RMSE = 5.2 deg C </h2>
+</div></div>
+<div class="sl-block" data-block-type="shape" data-block-id="dad23ab0d1b79cfb3741b25fa617cd94" style="min-width: 4px; min-height: 4px; width: 528px; height: 73px; left: 206px; top: 549px;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(68, 68, 68)" data-shape-stretch="true" style="z-index: 10; opacity: 0.86;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 528 73"><rect width="528" height="73" class="shape-element" fill="rgb(68, 68, 68)"></rect></svg></div></div></section><section><div class="sl-block" data-block-type="text" style="width: 800px; left: 80px; top: 22px; height: auto;" data-block-id="90fe704aa2bdcf1c55ad40a574edd75d"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Subtitle" style="z-index: 11;">
+<h1>Looks OK!</h1>
 </div></div>
 <div class="sl-block" data-block-type="image" data-block-id="f4f8e23fc223d75655d3aa0ec5cc98ec" style="min-width: 30px; min-height: 30px; width: 960px; height: 558.909382518043px; left: 0px; top: 131px;"><div class="sl-block-content" style="z-index: 12;"><img data-natural-width="1247" data-natural-height="726" style="visibility: visible;" data-src="https://s3.amazonaws.com/media-p.slid.es/uploads/hobsonlane/images/1260080/prediction_2013-pycon2015.png"></div></div>
-<div class="sl-block" data-block-type="shape" data-block-id="06fbfc9c45dc3aeabbab2fa5a006230b" style="min-width: 4px; min-height: 4px; width: 300px; height: 157px; left: 306px; top: 395px;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgba(0, 0, 0, 0)" data-shape-stretch="false" style="z-index: 13;" data-shape-stroke-color="#980000" data-shape-stroke-width="6"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="xMidYMid" viewbox="0 0 157 157"><defs><clippath id="shape-mask-91-1428765404193"><rect width="157" height="157"></rect></clippath></defs><rect width="157" height="157" clip-path="url(#shape-mask-91-1428765404193)" class="shape-element" fill="rgba(0, 0, 0, 0)" stroke="#980000" stroke-width="12"></rect></svg></div></div></section><section>
-<div class="sl-block" data-block-type="text" style="width: 800px; left: 62px; top: 0px; height: auto;" data-block-id="42ce83de7f6819447a9a6aabea000f90"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Subtitle" style="z-index: 11;">
-<h2>Not So Fast,</h2>
+<div class="sl-block" data-block-type="shape" data-block-id="06fbfc9c45dc3aeabbab2fa5a006230b" style="min-width: 4px; min-height: 4px; width: 300px; height: 157px; left: 306px; top: 395px;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgba(0, 0, 0, 0)" data-shape-stretch="false" style="z-index: 13;" data-shape-stroke-color="#ff9900" data-shape-stroke-width="6"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="xMidYMid" viewbox="0 0 157 157"><defs><clippath id="shape-mask-3-1428852416602"><rect width="157" height="157"></rect></clippath></defs><rect width="157" height="157" clip-path="url(#shape-mask-3-1428852416602)" class="shape-element" fill="rgba(0, 0, 0, 0)" stroke="#ff9900" stroke-width="12"></rect></svg></div></div></section><section>
+<div class="sl-block" data-block-type="text" style="width: 800px; left: 62px; top: 0px; height: auto;" data-block-id="42ce83de7f6819447a9a6aabea000f90"><div class="sl-block-content" data-placeholder-tag="h2" data-placeholder-text="Subtitle" style="z-index: 13;">
+<h1>Not So Fast</h1>
 
 <h2>Momentum "Trading"?</h2>
 </div></div>
 
-<div class="sl-block" data-block-type="image" data-block-id="e26a75d99070f11ab215d5f6f312382c" style="min-width: 30px; min-height: 30px; width: 900.038567493113px; height: 524px; left: 18px; top: 176px;"><div class="sl-block-content" style="z-index: 12;"><img data-natural-width="1247" data-natural-height="726" style="visibility: visible;" data-src="https://s3.amazonaws.com/media-p.slid.es/uploads/hobsonlane/images/1260086/prediction_Dec2013-Apr2014.png"></div></div>
-<div class="sl-block" data-block-type="shape" data-block-id="e5319f4f232dec2e26d2ecc801f3c918" style="min-width: 4px; min-height: 4px; width: 97px; height: 166px; left: 160px; top: 375px;"><div class="sl-block-content" data-shape-type="symbol-thin-arrow-down-right" data-shape-fill-color="rgb(152, 0, 0)" data-shape-stretch="true" style="z-index: 13;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="4 4 24 24"><g class="shape-element" fill="rgb(152, 0, 0)"><path d="M28 14c0-1.105-0.895-2-2-2s-2 0.895-2 2v7.172l-16.586-16.586c-0.781-0.781-2.047-0.781-2.828 0-0.391 0.391-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414l16.586 16.586h-7.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h14v-14z"></path></g></svg></div></div>
-<div class="sl-block" data-block-type="text" data-block-id="5d21bc1f52d5e9b38c23455898e4166a" style="height: auto; min-width: 30px; min-height: 30px; width: 470px; left: 367px; top: 439px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14; color: rgb(166, 28, 0); background-color: rgb(255, 255, 255);">
-<p><strong>Predictor extrpolates trend</strong></p>
-</div></div></section><section>
+<div class="sl-block" data-block-type="image" data-block-id="e26a75d99070f11ab215d5f6f312382c" style="min-width: 30px; min-height: 30px; width: 900.038567493113px; height: 524px; left: 20px; top: 176px;"><div class="sl-block-content" style="z-index: 0;"><img data-natural-width="1247" data-natural-height="726" style="visibility: visible;" data-src="https://s3.amazonaws.com/media-p.slid.es/uploads/hobsonlane/images/1260086/prediction_Dec2013-Apr2014.png"></div></div>
+<div class="sl-block" data-block-type="shape" data-block-id="e5319f4f232dec2e26d2ecc801f3c918" style="min-width: 4px; min-height: 4px; width: 97px; height: 166px; left: 143px; top: 376px;"><div class="sl-block-content" data-shape-type="symbol-thin-arrow-down-right" data-shape-fill-color="rgb(255, 153, 0)" data-shape-stretch="true" style="z-index: 14;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="4 4 24 24"><g class="shape-element" fill="rgb(255, 153, 0)"><path d="M28 14c0-1.105-0.895-2-2-2s-2 0.895-2 2v7.172l-16.586-16.586c-0.781-0.781-2.047-0.781-2.828 0-0.391 0.391-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414l16.586 16.586h-7.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h14v-14z"></path></g></svg></div></div>
+<div class="sl-block" data-block-type="text" data-block-id="5d21bc1f52d5e9b38c23455898e4166a" style="height: auto; min-width: 30px; min-height: 30px; width: 305px; left: 290px; top: 452px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12; color: rgb(255, 153, 0); background-color: rgba(0, 0, 0, 0);">
+<p><strong>Predictor just extrpolates trend</strong></p>
+</div></div>
+<div class="sl-block" data-block-type="shape" data-block-id="a319ac8dca381592831ef5407ffbef77" style="min-width: 4px; min-height: 4px; width: 304px; height: 85px; left: 290px; top: 452px;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(255, 255, 255)" data-shape-stretch="true" style="z-index: 10; opacity: 0.79;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 304 85"><rect width="304" height="85" class="shape-element" fill="rgb(255, 255, 255)"></rect></svg></div></div></section><section>
 
 <div class="sl-block" data-block-type="iframe" data-block-id="77b5f744b2da6b8fd7a0fd07bfe04353" style="min-width: 30px; min-height: 30px; width: 800px; height: 525px; left: 80px; top: 142px;"><div class="sl-block-content" style="z-index: 12;"><iframe webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" sandbox="allow-forms allow-scripts allow-popups allow-same-origin allow-pointer-lock" data-src="https://github.com/hobson/pug/blob/master/pug/ann/pybrain_weather_predictor.rst"></iframe></div></div>
 <div class="sl-block" data-block-type="text" data-block-id="599358b1451bbabbfe63c5f4780f6076" style="height: auto; min-width: 30px; min-height: 30px; width: 761px; left: 100px; top: 30px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
@@ -212,6 +215,67 @@ epoch    999  total error        5.231   avg weight         1.008
 	<p><strong><span style="font-size:48px">Sacramento?</span></strong></p>
 	</li>
 </ul>
+</div></div></section><section>
+
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 761px; left: 100px; top: 22px;" data-block-id="6bfc86f7874f607f8570ce0c840986d8"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Automatic Feature Selection</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 960px; left: 0px; top: 328px;" data-block-id="a5e4af9577127ecf9a9699d1c9bcbf1a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<ul>
+	<li><span style="font-size:48px"><strong><span style="text-align:left">Mutual information</span></strong></span></li>
+	<li><span style="font-size:48px"><strong><span style="text-align:left">Entropy</span></strong></span></li>
+	<li><span style="font-size:48px"><strong>Autocorrelation</strong></span></li>
+	<li><span style="font-size:48px"><strong>Delayed cross-correlation</strong></span></li>
+</ul>
+</div></div></section><section>
+
+
+<div class="sl-block" data-block-type="text" style="height: auto; width: 761px; left: 100px; top: 22px;" data-block-id="07b5f93b7eadb8cb95bae82f2aa35e6b"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Auto-Restructuring</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 848px; left: 56px; top: 130px;" data-block-id="1b869a2d34b146d46983f1b160e386ba"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<ul>
+	<li class="fragment" style="color:rgb(255, 255, 255); font-size:30.6666660308838px" data-fragment-index="0">
+	<p><strong><span style="font-size:48px">Prune</span></strong></p>
+
+	<ul>
+		<li style="color:rgb(255, 255, 255); font-size:30.6666660308838px">
+		<p><strong><span style="font-size:32px">Near-zero weights</span></strong></p>
+		</li>
+		<li style="color:rgb(255, 255, 255)">
+		<p><strong><span style="font-size:32px">Low entropy</span></strong></p>
+		</li>
+	</ul>
+	</li>
+	<li style="color:rgb(255, 255, 255)" class="fragment" data-fragment-index="1">
+	<p style="color:rgb(255, 255, 255)"><span><strong>​</strong></span><strong><span style="font-size:48px">Meta learning</span></strong></p>
+
+	<ul>
+		<li style="color:rgb(255, 255, 255)">
+		<p style="color:rgb(255, 255, 255)"><strong><span style="font-size:48px"><span style="font-size:32px"><strong>Reinforcement</strong></span></span></strong></p>
+		</li>
+		<li style="color:rgb(255, 255, 255); font-size:30.6666660308838px">
+		<p style="color:rgb(255, 255, 255); font-size:30.6666660308838px;"><span style="font-size:32px"><strong>Genetic</strong></span></p>
+		</li>
+	</ul>
+	</li>
+	<li style="color:rgb(255, 255, 255); font-size:30.6666660308838px" class="fragment" data-fragment-index="2">
+	<p><strong><span style="font-size:48px">Convolution Structure</span></strong></p>
+
+	<ul>
+		<li style="color:rgb(255, 255, 255); font-size:30.6666660308838px">
+		<p><strong><span style="font-size:32px">By name</span></strong></p>
+		</li>
+		<li style="color:rgb(255, 255, 255); font-size:30.6666660308838px">
+		<p><strong><span style="font-size:32px">By units</span></strong></p>
+		</li>
+		<li style="color:rgb(255, 255, 255); font-size:30.6666660308838px">
+		<p><strong><span style="font-size:32px">By stats</span></strong></p>
+		</li>
+	</ul>
+	</li>
+</ul>
 </div></div></section>
 			</div>
 		</div>
@@ -219,7 +283,7 @@ epoch    999  total error        5.231   avg weight         1.008
 
 		
 <script>
-	var SLConfig = {"current_user":{"id":268083,"username":"hobsonlane","name":"Hobson Lane","description":"Data Scientist and AI Hacker","thumbnail_url":"https://www.gravatar.com/avatar/8eb2d80a35122171463f423eeec7bfa4?s=140\u0026d=https%3A%2F%2Fs3.amazonaws.com%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","pro":false,"enterprise":false,"enterprise_manager":false,"registered":true,"email":"hobsonlane@gmail.com","notify_on_receipt":false,"billing_address":null,"editor_tutorial_completed":true,"settings":{"id":89426,"present_controls":false,"present_upsizing":true,"editor_grid":true,"editor_snap":true,"developer_mode":true}},"deck":{"id":386189,"slug":"predict-weather-with-pybrain","title":"Neural Nets to Predict Weather with pybrain","description":"PyCon 2015 Lightning Talk (5 min) to demonstrate how to use the pybrain package to solve two machine learning problems: 1) regression (time series forecasting) -- predict weather  2) reinforcement learning (optimal control) -- navigate a maze","visibility":"all","published_at":"2015-04-10T17:30:05.065Z","sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/secure/b5aa00/decks.jpg","view_count":2,"user":{"id":268083,"username":"hobsonlane","name":"Hobson Lane","description":"Data Scientist and AI Hacker","thumbnail_url":"https://www.gravatar.com/avatar/8eb2d80a35122171463f423eeec7bfa4?s=140\u0026d=https%3A%2F%2Fs3.amazonaws.com%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","pro":false,"enterprise":false,"enterprise_manager":false,"registered":true},"background_transition":"slide","transition":"slide","theme_id":null,"theme_font":"montserrat","theme_color":"black-blue","auto_slide_interval":10000,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"should_loop":false,"rtl":false,"version":2,"access_token":"s5FKzK53zqdmeXJFB9dPsqsV2jwr","notes":{}}};
+	var SLConfig = {"current_user":{"id":268083,"username":"hobsonlane","name":"Hobson Lane","description":"Data Scientist and AI Hacker","thumbnail_url":"https://www.gravatar.com/avatar/8eb2d80a35122171463f423eeec7bfa4?s=140\u0026d=https%3A%2F%2Fs3.amazonaws.com%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","pro":false,"enterprise":false,"enterprise_manager":false,"registered":true,"email":"hobsonlane@gmail.com","notify_on_receipt":false,"billing_address":null,"editor_tutorial_completed":true,"settings":{"id":89426,"present_controls":false,"present_upsizing":true,"editor_grid":true,"editor_snap":true,"developer_mode":true}},"deck":{"id":386189,"slug":"pycon2015-predict-weather-with-pybrain","title":"Neural Nets to Predict Weather with pybrain","description":"PyCon 2015 Lightning Talk (5 min) to demonstrate how to use the pybrain package to solve two machine learning problems: 1) regression (time series forecasting) -- predict weather  2) reinforcement learning (optimal control) -- navigate a maze","visibility":"all","published_at":"2015-04-10T17:30:05.065Z","sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/secure/b5aa00/decks.jpg","view_count":3,"user":{"id":268083,"username":"hobsonlane","name":"Hobson Lane","description":"Data Scientist and AI Hacker","thumbnail_url":"https://www.gravatar.com/avatar/8eb2d80a35122171463f423eeec7bfa4?s=140\u0026d=https%3A%2F%2Fs3.amazonaws.com%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","pro":false,"enterprise":false,"enterprise_manager":false,"registered":true},"background_transition":"slide","transition":"slide","theme_id":null,"theme_font":"montserrat","theme_color":"black-blue","auto_slide_interval":10000,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"should_loop":false,"rtl":false,"version":2,"access_token":"s5FKzK53zqdmeXJFB9dPsqsV2jwr","notes":{}}};
 </script>
 
 		<script>
