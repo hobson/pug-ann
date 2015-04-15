@@ -57,7 +57,7 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, use_cac
     for day in days:
         url = ('http://www.wunderground.com/history/airport/{airport_code}/{year}/{month}/{day}/DailyHistory.html?MR=1&format=1'.format(
                airport_code=airport_code,
-               year=day.year, 
+               year=day.year,
                month=day.month,
                day=day.day))
         if verbosity > 1:
@@ -68,7 +68,7 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, use_cac
             M = (buf.count(',') + N) / float(N)
             print('Retrieved CSV for airport code "{}" with appox. {} lines and {} columns = {} cells.'.format(
                   airport_code, N, int(round(M)), int(round(M)) * N))
-        if (buf.count('\n') > 2) or ((buf.count('\n') > 1) and buf.split('\n')[1].count(',') > 0):  
+        if (buf.count('\n') > 2) or ((buf.count('\n') > 1) and buf.split('\n')[1].count(',') > 0):
             table = util.read_csv(buf, format='header+values-list', numbers=True)
             columns = [s.strip() for s in table[0]]
             table = table[1:]
@@ -105,7 +105,7 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, use_cac
     return df
 
 
-def api(feature='conditions', city='Portland',state='OR', key=None):
+def api(feature='conditions', city='Portland', state='OR', key=None):
     """Use the wunderground API to get current conditions instead of scraping
 
     Please be kind and use your own key (they're FREE!):
@@ -134,7 +134,7 @@ def api(feature='conditions', city='Portland',state='OR', key=None):
     feature = util.fuzzy_get(features, feature)
     # Please be kind and use your own key (they're FREE!):
     # http://www.wunderground.com/weather/api/d/login.html
-    key = key or env.get('WUNDERGROUND', None, verbosity=-1) or env.get('WUNDERGROUND_KEY', 'c45a86c2fc63f7d0', verbosity=-1)  
+    key = key or env.get('WUNDERGROUND', None, verbosity=-1) or env.get('WUNDERGROUND_KEY', 'c45a86c2fc63f7d0', verbosity=-1)
     url = 'http://api.wunderground.com/api/{key}/{feature}/q/{state}/{city}.json'.format(
         key=key, feature=feature, state=state, city=city)
     return json.load(urllib.urlopen(url))
@@ -178,12 +178,13 @@ def daily(location='Fresno, CA', years=1, use_cache=True, verbosity=1):
 
     df = pd.DataFrame()
     for year in years:
-        url = ( 'http://www.wunderground.com/history/airport/{airport}/{yearstart}/1/1/'
-                'CustomHistory.html?dayend=31&monthend=12&yearend={yearend}'
-                '&req_city=&req_state=&req_statename=&reqdb.zip=&reqdb.magic=&reqdb.wmo=&MR=1&format=1').format(
-               airport=airport_code, 
-               yearstart=year,
-               yearend=year)
+        url = ('http://www.wunderground.com/history/airport/{airport}/{yearstart}/1/1/'
+               + 'CustomHistory.html?dayend=31&monthend=12&yearend={yearend}'
+               + '&req_city=&req_state=&req_statename=&reqdb.zip=&reqdb.magic=&reqdb.wmo=&MR=1&format=1').format(
+            airport=airport_code,
+            yearstart=year,
+            yearend=year
+            )
         if verbosity > 1:
             print('GETing *.CSV using "{0}"'.format(url))
         buf = urllib.urlopen(url).read()
@@ -204,7 +205,7 @@ def daily(location='Fresno, CA', years=1, use_cache=True, verbosity=1):
         dates = [float('nan')] * len(table)
         for i, row in enumerate(table):
             for j, value in enumerate(row):
-                if not value and value != None:
+                if not value and value is not None:
                     value = 0
                     continue
                 if columns[j] in tzs:
@@ -233,5 +234,3 @@ def daily(location='Fresno, CA', years=1, use_cache=True, verbosity=1):
             warnings.warn('Unable to write weather data to cache file at {}'.format(cache_path))
 
     return df
-# airport.locations = dict([(str(city) + ', ' + str(region)[-2:], str(ident)) for city, region, ident in pd.DataFrame.from_csv(os.path.join(CACHE_PATH, 'airports.csv')).sort(ascending=False)[['municipality', 'iso_region', 'ident']].values])
-
