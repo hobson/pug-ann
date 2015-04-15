@@ -26,20 +26,20 @@ You really want to contribute, right?
 
 If you're a user and not a developer, and have an up-to-date posix OS with the postgres, xml2, and xlst development packages installed, then just use `pip`.
 
-    pip install pug-ann
+    pip install pug-ann --allow-external pybrain
 
 ### Fedora
 
 If you're on Fedora >= 16 but haven't done a lot of python binding development, then you'll need some libraries before pip will succeed.
 
     sudo yum install -y python-devel libxml2-devel libxslt-devel gcc-gfortran python-scikit-learn postgresql postgresql-server postgresql-libs postgresql-devel
-    pip install pug
+    pip install pug --allow-external pybrain
 
 ### Bleeding Edge
 
 Even the releases are very unstable, but if you want to have the latest, most broken code
 
-    pip install git+git://github.com/hobsonlane/pug.git@master
+    pip install git+git://github.com/hobsonlane/pug.git@master --allow-external pybrain
 
 ### Warning
 

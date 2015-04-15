@@ -31,16 +31,16 @@ version = env.get('__version__', '0.0.1')
 package_docstring = env.get('__doc__', '`{}` python package'.format(project_name))
 description = package_docstring.split('\n')[0]
 long_description = package_docstring
-__url__  = env.get('__url__', 'http://github.com/hobson/')
-__authors__  = env.get('__authors__', ('Hobson <hobson@totalgood.com>',))
+__url__ = env.get('__url__', 'http://github.com/hobson/')
+__authors__ = env.get('__authors__', ('Hobson <hobson@totalgood.com>',))
 try:
     long_description = open('README.rst', 'r').read()
 except:  # (IOError, ImportError, OSError, RuntimeError):
     print('WARNING: Unable to find or read README.rst.')
 
 dependency_links = [
-  'http://github.com/hobson/pybrain/tarball/master#egg=pybrain-0.3.3',
-] #  ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master'] 
+    'http://github.com/hobson/pybrain/tarball/master#egg=pybrain-0.3.3',
+    ]  # ['http://github.com/hobson/pug-nlp/tarball/master#egg=pug-nlp-master']
 EXCLUDE_FROM_PACKAGES = []
 
 print('Installing package named {} from the {} project. . .'.format(package_name, project_name))
@@ -68,11 +68,9 @@ install_requires = [
     'matplotlib==1.4.3',
     'numpy==1.9.2',
     'scipy>=0.15.1',
-    'pybrain>=0.3.3',
-
     'pug-nlp>=0.0.17',
     ]
-print('install_requires: {}'.format(install_requires))
+# print('install_requires: {}'.format(install_requires))
 
 
 setup(
@@ -81,29 +79,29 @@ setup(
     namespace_packages=[__namespace_package__],
 
     # install non-.py files listed in MANIFEST.in (.js, .html, .txt, .md, etc)
-    include_package_data = True,
-    install_requires = install_requires,
-    dependency_links = dependency_links,
+    include_package_data=True,
+    install_requires=install_requires,
+    dependency_links=dependency_links,
     # scripts=['pug/bin/install_requirements'],
     # entry_points={'console_scripts': [
     #     'test-ann = pug.tests:main',
     # ]},
-    version = version,
-    description = description,
-    long_description = long_description,
-    author = ', '.join(__authors__),
-    author_email = __authors__[0].split('<')[1].strip().strip('>'),
+    version=version,
+    description=description,
+    long_description=long_description,
+    author=', '.join(__authors__),
+    author_email=__authors__[0].split('<')[1].strip().strip('>'),
 
-    #tests_require = ['django-setuptest', 'south'],
-    #test_suite = 'setuptest.setuptest.SetupTestSuite',
-    #cmdclass = {'test': test},
+    #tests_require=['django-setuptest', 'south'],
+    #test_suite='setuptest.setuptest.SetupTestSuite',
+    #cmdclass={'test': test},
     # this would install the master branch from github
-    # url = __url__,
+    # url=__url__,
 
     # Force setup.py to use the latest github master source files rather than the cheeseshop tarball: 
-    download_url = "{}/tarball/master".format(__url__),
-    keywords = ["artificial neural network", "neural network", "pybrain", "agent", "bot", "ai", "crawl", "data", "science", "data science", "math", "machine-learning", "statistics", "database"],
-    classifiers = [
+    download_url="{}/tarball/master".format(__url__),
+    keywords=["artificial neural network", "neural network", "pybrain", "agent", "bot", "ai", "crawl", "data", "science", "data science", "math", "machine-learning", "statistics", "database"],
+    classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
         "Development Status :: 3 - Alpha",
