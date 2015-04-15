@@ -6,10 +6,10 @@ __namespace_package__ = 'pug'
 __subpackage__ = 'ann'
 __doc__ = "{}.{} -- Artificial Neural Netwwork (ANN) utilities by and for the PDX Python User Group (PUG)".format(__namespace_package__, __subpackage__)
 __url__ = "https://github.com/hobson/{}-{}".format(__namespace_package__, __subpackage__)
-__version__ = '0.0.21'
-__author__ = "Hobson <hobson@totalgood.com>"
+__version__ = '0.0.22'
+__author__ = "Hobson <pug@totalgood.com>"
 __authors__ = (
-    "Hobson <hobson@totalgood.com>",
+    "Hobson <pug@totalgood.com>",
     )
 
 import os

@@ -68,7 +68,7 @@ install_requires = [
     'matplotlib==1.4.3',
     'numpy==1.9.2',
     'scipy>=0.15.1',
-    'pug-nlp>=0.0.18',
+    'pug-nlp>=0.0.19',
     ]
 # print('install_requires: {}'.format(install_requires))
 
@@ -98,7 +98,7 @@ setup(
     # this would install the master branch from github
     # url=__url__,
 
-    # Force setup.py to use the latest github master source files rather than the cheeseshop tarball: 
+    # Force setup.py to use the latest github master source files rather than the cheeseshop tarball:
     download_url="{}/tarball/master".format(__url__),
     keywords=["artificial neural network", "neural network", "pybrain", "agent", "bot", "ai", "crawl", "data", "science", "data science", "math", "machine-learning", "statistics", "database"],
     classifiers=[
