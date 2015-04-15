@@ -68,7 +68,7 @@ install_requires = [
     'matplotlib==1.4.3',
     'numpy==1.9.2',
     'scipy>=0.15.1',
-    'pug-nlp>=0.0.17',
+    'pug-nlp>=0.0.18',
     ]
 # print('install_requires: {}'.format(install_requires))
 
