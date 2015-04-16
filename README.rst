@@ -37,7 +37,7 @@ just use ``pip``.
 
 ::
 
-    pip install pug-ann
+    pip install pug-ann --allow-external pybrain
 
 Fedora
 ~~~~~~
@@ -48,7 +48,7 @@ development, then you'll need some libraries before pip will succeed.
 ::
 
     sudo yum install -y python-devel libxml2-devel libxslt-devel gcc-gfortran python-scikit-learn postgresql postgresql-server postgresql-libs postgresql-devel
-    pip install pug
+    pip install pug --allow-external pybrain
 
 Bleeding Edge
 ~~~~~~~~~~~~~
@@ -58,7 +58,7 @@ most broken code
 
 ::
 
-    pip install git+git://github.com/hobsonlane/pug.git@master
+    pip install git+git://github.com/hobsonlane/pug.git@master --allow-external pybrain
 
 Warning
 ~~~~~~~

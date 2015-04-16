@@ -10,6 +10,7 @@ before_install:
   - conda update --yes conda
   - conda install --yes python=$TRAVIS_PYTHON_VERSION pyparsing atlas numpy scipy matplotlib dateutil Pillow statsmodels
 install:
+  - sudo pip install scipy==0.15.1
   - pip install git+https://github.com/hobson/pybrain.git@master#egg=pybrain-0.3.3
   - pip install pug-nlp
   - python setup.py install
