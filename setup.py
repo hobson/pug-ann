@@ -29,7 +29,7 @@ print('Found package info in {}: {}'.format(package_info_path, env))
 
 version = env.get('__version__', '0.0.1')
 package_docstring = env.get('__doc__', '`{}` python package'.format(project_name))
-description = package_docstring.split('\n')[0]
+description = "Artificial Neural Network (ANN) utilities (helper functions for a PyBrain fork)"
 long_description = package_docstring
 __url__ = env.get('__url__', 'http://github.com/hobson/')
 __authors__ = env.get('__authors__', ('Hobson <hobson@totalgood.com>',))
@@ -37,6 +37,7 @@ try:
     long_description = open('README.rst', 'r').read()
 except:  # (IOError, ImportError, OSError, RuntimeError):
     print('WARNING: Unable to find or read README.rst.')
+
 
 dependency_links = [
     'http://github.com/hobson/pybrain/tarball/master#egg=pybrain-0.3.3',
