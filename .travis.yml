@@ -9,12 +9,10 @@ before_install:
   - conda update --yes conda
   - conda install --yes python=$TRAVIS_PYTHON_VERSION pyparsing atlas numpy scipy matplotlib dateutil Pillow statsmodels
 install:
-  # # You'll want to install nlp then scipy on dev environments but not on travis (use conda)
-  # - sudo pip install nlp
-  # - sudo pip install scipy
-  - pip install git+https://github.com/hobson/pybrain.git@master#egg=pybrain-0.3.3
-  - pip install pug-nlp
-  - python setup.py install
+  - pip install git+https://github.com/cslu-nlp/nlup.git@master#egg=nlup-master
+  - pip install git+https://github.com/hobson/pug-nlp.git@master#egg=pug-nlp-master
+  - pip install git+https://github.com/hobson/pybrain.git@master#egg=pybrain-master
+  - pip install .
   - pip freeze
 script: 
   - "python pug/ann/tests.py"
