@@ -27,14 +27,14 @@ progressbar2==2.7.3
 
 python-slugify==0.1.0
 
-matplotlib==1.4.3
-numpy==1.8.2
+matplotlib>=1.4.3
+numpy>=1.8.2
 
 ######################
 # pug-ann requirements
 
 # pybrain requires scipy which requires these, but doesn't install them when you do `pip install pybrain` (which fails due to failed imports)
-# matplotlib==1.4.3
+# matplotlib>=1.4.3
 pyparsing==2.0.3
 # fedora 20 is at these versions, so you know the required source libs are available during pip install
 scipy==0.12.1

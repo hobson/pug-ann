@@ -5,7 +5,7 @@ fuzzywuzzy==0.5.0
 # # ipython needs ZeroMQ
 # pyzmq==14.5.0
 # ipython[all]
-matplotlib==1.4.3
+matplotlib>=1.4.3
 pandas>=0.15.2
 Pillow==2.7
 pip==6.0.8
