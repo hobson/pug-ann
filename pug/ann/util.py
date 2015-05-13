@@ -33,11 +33,13 @@ DATA_PATH = os.path.join(DATA_PATH, '..', 'data')
 LAYER_TYPES = set([getattr(pybrain.structure, s) for s in
                   dir(pybrain.structure) if s.endswith('Layer')])
 
+FAST = False
 try:
     from arac.pybrainbridge import _FeedForwardNetwork as FeedForwardNetwork
+    FAST = True
 except:
     from pybrain.structure import FeedForwardNetwork
-    print("No fast (ARAC, a Fortran and C++ library) FeedForwardNetwork was found, "
+    print("No fast (ARAC, a FC++ library) FeedForwardNetwork was found, "
           "so using the slower pybrain python implementation of FFNN.")
 
 
@@ -102,11 +104,12 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', 
     nn.addConnection(pb.structure.FullConnection(nn['hidden-{}'.format(i) if i else 'hidden'], nn['output']))
 
     nn.sortModules()
-    try:
-        nn.convertToFastNetwork()
-    except:
-        if verbosity > 0:
-            print('Unable to convert slow PyBrain NN to a fast ARAC network...')
+    if FAST:
+        try:
+            nn.convertToFastNetwork()
+        except:
+            if verbosity > 0:
+                print('Unable to convert slow PyBrain NN to a fast ARAC network...')
     if verbosity > 0:
         print(nn.connections)
     return nn
