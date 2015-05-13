@@ -1,4 +1,4 @@
-"""Utilities for maniuplating, analyzing and plotting `pybrain` `Network` and `DataSet` objects
+"""Maniuplate, analyze and plot `pybrain` `Network` and `DataSet` objects
 
 TODO:
     Incorporate into pybrain fork so pug doesn't have to depend on pybrain
@@ -28,8 +28,17 @@ from pug.ann.data import weather
 #import pug.nlp.util as nlp
 
 # print(os.path.realpath(__file__))
-DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')
-LAYER_TYPES = set([getattr(pybrain.structure, s) for s in dir(pybrain.structure) if s.endswith('Layer')])
+DATA_PATH = os.path.dirname(os.path.realpath(__file__))
+DATA_PATH = os.path.join(DATA_PATH, '..', 'data')
+LAYER_TYPES = set([getattr(pybrain.structure, s) for s in
+                  dir(pybrain.structure) if s.endswith('Layer')])
+
+try:
+    from arac.pybrainbridge import _FeedForwardNetwork as FeedForwardNetwork
+except:
+    from pybrain.structure import FeedForwardNetwork
+    print("No fast (ARAC, a Fortran and C++ library) FeedForwardNetwork was found, "
+          "so using the slower pybrain python implementation of FFNN.")
 
 
 def normalize_layer_type(layer_type):
@@ -42,7 +51,7 @@ def normalize_layer_type(layer_type):
         return getattr(pb.structure, layer_type.strip())
     except AttributeError:
         try:
-            return getattr(pb.structure, layer_type.strip()+'Layer')
+            return getattr(pb.structure, layer_type.strip() + 'Layer')
         except AttributeError:
             pass
     return [normalize_layer_type(lt) for lt in layer_type]
@@ -87,11 +96,17 @@ def build_ann(N_input=None, N_hidden=2, N_output=1, hidden_layer_type='Linear', 
     nn.addConnection(pb.structure.FullConnection(nn['input'], nn['hidden'] if N_hidden else nn['output']))
     for i, (Nhid, hidlaytype) in enumerate(zip(N_hidden[:-1], hidden_layer_type[:-1])):
         Nhid = int(Nhid)
-        nn.addConnection(pb.structure.FullConnection(nn[('hidden-{}'.format(i) if i else 'hidden')], nn['hidden-{}'.format(i+1)]))
-    i = len(N_hidden)-1
+        nn.addConnection(pb.structure.FullConnection(nn[('hidden-{}'.format(i) if i else 'hidden')],
+                         nn['hidden-{}'.format(i + 1)]))
+    i = len(N_hidden) - 1
     nn.addConnection(pb.structure.FullConnection(nn['hidden-{}'.format(i) if i else 'hidden'], nn['output']))
 
     nn.sortModules()
+    try:
+        nn.convertToFastNetwork()
+    except:
+        if verbosity > 0:
+            print('Unable to convert slow PyBrain NN to a fast ARAC network...')
     if verbosity > 0:
         print(nn.connections)
     return nn
@@ -128,7 +143,8 @@ def prepend_dataset_with_weather(samples, location='Fresno, CA', weather_columns
     if verbosity > 1:
         print('Retrieved weather for years {}:'.format(years))
         print(weather_df)
-    weather_columns = [label if label in weather_df.columns else weather_df.columns[int(label)] for label in (weather_columns or [])]
+    weather_columns = [label if label in weather_df.columns else weather_df.columns[int(label)]
+                       for label in (weather_columns or [])]
     for sampnum, sample in enumerate(samples):
         timestamp = timestamps[sampnum]
         try:
@@ -147,88 +163,7 @@ def prepend_dataset_with_weather(samples, location='Fresno, CA', weather_columns
     return samples
 
 
-def dataset_from_features(df, delays=(1, 2,), quantiles=(), input_columns=(0,), target_columns=(-1,), weather_columns=(), features=(), verbosity=1):
-        # Compute the length of extra features added on to the vector from the rolling window of previous threshold values
-    extras = (+ int('dow' in features) * 7
-              + int('moy' in features) * 12
-              + int('woy' in features)
-              + int('date' in features)
-              + len(quantiles)
-              + len(weather_columns)
-              )
-
-    N = max(list(delays) + list(quantiles))
-    last_date = first_date = 0
-    try:
-        if verbosity > 0:
-            print('The total input vector length (dimension) is now {0}'.format(len(N) + extras))
-            print('Starting to augment {0}x{1} sample inputs by adding adding {2} additional features'.format(
-                len(df), len(input_columns), extras))
-        if verbosity > 0:
-            print('The first sample input was {0}'.format(
-                df[input_columns].iloc[0]))
-            print('The first sample target was {0}'.format(
-                df[target_columns].iloc[0]))
-            print('The last sample input was {0}'.format(
-                df[input_columns].iloc[-1]))
-            print('The last sample target was {0}'.format(
-                df[target_columns].iloc[-1]))
-        first_date = df.index.iloc[0].date().toordinal()
-        last_date = df.index.iloc[-1].date().toordinal()
-    except:
-        if verbosity > -1:
-            from traceback import format_exc
-            warnings.warn(format_exc())
-        if verbosity > 1:
-            import ipdb
-            ipdb.set_trace()
-    date_range = (last_date - first_date) + 1 or 1
-
-    # FIXME: scale each feature/column/dimension independently using pug.ann.util.dataset_from_dataframe
-    #        but mean and std become vectors of the same dimension as the feature/input vector
-    bit_scale = 5  # number of standard deviations for the magnitude of bit
-
-    # convert the list of dicts ((input, output) supervised dataset pairs) into a pybrains.Dataset
-    ds = pybrain.datasets.SupervisedDataSet(len(N) + extras, 1)
-    for sampnum, (input_vector, target_vector) in enumerate(zip(df[input_columns].values, df[target_columns].values)):
-        # sample['input'] and ['output'] are pd.Series tables so convert them to normal list()
-        # inputs = list(sample['input'])
-
-        # the date we're trying to predict the threshold for
-        timestamp = target_vector.index[0]
-        for feature_name in sorted_features:
-            if feature_name.startswith('morn'):
-                day = get_day(series, date=timestamp.date())
-                morning_loads = (day.values[:morn] - mean) / std
-                if verbosity > 2:
-                    print('day = {0} and morning = {1}'.format(len(day), len(morning_loads)))
-                inputs = list(morning_loads) + inputs
-            elif feature_name == 'dow':
-                dow_bits = [0] * 7
-                dow_bits[timestamp.weekday()] = bit_scale
-                inputs = dow_bits + inputs
-            elif feature_name == 'moy':
-                moy_bits = [0] * 12
-                moy_bits[timestamp.month - 1] = bit_scale
-                inputs = moy_bits + inputs
-            elif feature_name == 'woy':
-                inputs = [(timestamp.weekofyear - 26.) * 3 * bit_scale / 52] + inputs
-            elif feature_name == 'date':
-                inputs = [(timestamp.date().toordinal() - first_date - date_range / 2.) * 3 * bit_scale / date_range] + inputs
-
-            if pd.isnull(inputs).any():
-                msg = 'Feature "{0}" within the feature list: {1} created null/NaN input values\nFor sample {2} and date {3}\nInput vector positions {4}:\nInput vector: {5}'.format(
-                    feature_name, sorted_features, sampnum, timestamp, ann.table_nan_locs(inputs), inputs)
-                msg += '\nBuilding load Series:\n{0}\n'.format(series)
-                if ignore_nans:
-                    warnings.warn(msg)
-                else:
-                    raise ValueError(msg)
-
-        ds.addSample(inputs, list(target_vector.values))
-
-
-def dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=(-1,), normalize=False, include_last=False, verbosity=1):
+def dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=(-1,), normalize=False, verbosity=1):
     """Compose a pybrain.dataset from a pandas DataFrame
 
     Arguments:
@@ -250,9 +185,11 @@ def dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=(-1,
         Detect ordinal variables and convert to continuous int sequence
         SEE: http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm
     """
-
     if isinstance(delays, int):
-        delays = range(1, delays+1)
+        if delays:
+            delays = range(1, delays + 1)
+        else:
+            delays = [0]
     delays = np.abs(np.array([int(i) for i in delays]))
     inputs = [df.columns[int(inp)] if isinstance(inp, (float, int)) else str(inp) for inp in inputs]
     outputs = [df.columns[int(out)] if isinstance(out, (float, int)) else str(out) for out in (outputs or [])]
@@ -275,23 +212,31 @@ def dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=(-1,
         print("Output mean values (used to normalize output biases): {}".format(means[N_inp:]))
     ds = pb.datasets.SupervisedDataSet(N_inp * len(delays), N_out)
     if verbosity > 0:
-        print("Dataset dimensions are {}x{} (indim x outdim)".format(ds.indim, ds.outdim))
-    for i, out_vec in enumerate(df[outputs].values):
-        if verbosity > 1:
-            print('sample[{i}].target={out_vec}'.format(i=i, out_vec=out_vec))
-        if i < max(delays):
-            continue
-        inp_vec = []
-        for delay in delays:
-            inp_vec += list((df[inputs].values[i-delay] - means[:N_inp]) / stds[:N_inp])
-        ds.addSample(inp_vec, (out_vec - means[N_inp:]) / stds[N_inp:])
-    if include_last:
-        inp_vec = []
-        i = len(df)
-        for delay in delays:
-            inp_vec += list((df[inputs].values[i-delay] - means[:N_inp]) / stds[:N_inp])
-        # set the output to vector of NaNs for the last sample
-        ds.addSample(inp_vec, float('nan') * np.ones(N_out))
+        print("Dataset dimensions are {}x{}x{} (records x indim x outdim) for {} delays, {} inputs, {} outputs".format(
+              len(df), ds.indim, ds.outdim, len(delays), len(inputs), len(outputs)))
+    # FIXME: normalize the whole matrix at once and add it quickly rather than one sample at a time
+    if delays == np.array([0]) and not normalize:
+        if verbosity > 0:
+            print("No tapped delay lines (delays) were requested, so using undelayed features for the dataset.")
+        assert(df[inputs].values.shape[0] == df[outputs].values.shape[0])
+        ds.setField('input', df[inputs].values)
+        ds.setField('target', df[outputs].values)
+        ds.linkFields(['input', 'target'])
+        # for inp, outp in zip(df[inputs].values, df[outputs].values):
+        #     ds.appendLinked(inp, outp)
+        assert(len(ds['input']) == len(ds['target']))
+    else:
+        for i, out_vec in enumerate(df[outputs].values):
+            if verbosity > 0 and i % 100 == 0:
+                print("{}%".format(i / .01 / len(df)))
+            elif verbosity > 1:
+                print('sample[{i}].target={out_vec}'.format(i=i, out_vec=out_vec))
+            if i < max(delays):
+                continue
+            inp_vec = []
+            for delay in delays:
+                inp_vec += list((df[inputs].values[i - delay] - means[:N_inp]) / stds[:N_inp])
+            ds.addSample(inp_vec, (out_vec - means[N_inp:]) / stds[N_inp:])
     if verbosity > 0:
         print("Dataset now has {} samples".format(len(ds)))
     if normalize:
@@ -300,27 +245,124 @@ def dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=(-1,
         return ds
 
 
-def input_dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=None, normalize=True, include_last=True, verbosity=1):
+# def dataset_from_feature_names(df, delays=(1, 2,), quantiles=(), input_columns=(0,), target_columns=(-1,),
+#                                weather_columns=(), features=(), verbosity=1):
+#     """FIXME: Untested. Transform Datafram columns and append to input_columns as additional features
+
+#     Arguments:
+#         features (seq of str): names of feautures to be appended to the input vector (feature set)
+
+#     """
+#     raise NotImplementedError("Better to implement this as a separate feature transformation function")
+#     # Compute the length of extra features added on to the vector from the rolling window of previous
+#     # threshold values
+#     extras = (+ int('dow' in features) * 7
+#               + int('moy' in features) * 12
+#               + int('woy' in features)
+#               + int('date' in features)
+#               + len(quantiles)
+#               + len(weather_columns)
+#               )
+
+#     N = max(list(delays) + list(quantiles))
+#     last_date = first_date = 0
+#     try:
+#         if verbosity > 0:
+#             print('The total input vector length (dimension) is now {0}'.format(len(N) + extras))
+#             print('Starting to augment {0}x{1} sample inputs by adding adding {2} additional features'.format(
+#                 len(df), len(input_columns), extras))
+#         if verbosity > 0:
+#             print('The first sample input was {0}'.format(
+#                 df[input_columns].iloc[0]))
+#             print('The first sample target was {0}'.format(
+#                 df[target_columns].iloc[0]))
+#             print('The last sample input was {0}'.format(
+#                 df[input_columns].iloc[-1]))
+#             print('The last sample target was {0}'.format(
+#                 df[target_columns].iloc[-1]))
+#         first_date = df.index.iloc[0].date().toordinal()
+#         last_date = df.index.iloc[-1].date().toordinal()
+#     except:
+#         if verbosity > -1:
+#             from traceback import format_exc
+#             warnings.warn(format_exc())
+#         if verbosity > 1:
+#             import ipdb
+#             ipdb.set_trace()
+#     date_range = (last_date - first_date) + 1 or 1
+
+#     # FIXME: scale each feature/column/dimension independently using pug.ann.util.dataset_from_dataframe
+#     #        but mean and std become vectors of the same dimension as the feature/input vector.
+#     #        scikit-learn has transformations that do this more reasonably
+#     bit_scale = 5  # number of standard deviations for the magnitude of bit
+
+#     # convert the list of dicts ((input, output) supervised dataset pairs) into a pybrains.Dataset
+#     ds = pybrain.datasets.SupervisedDataSet(len(N) + extras, 1)
+#     sorted_features = sorted(features)
+#     for sampnum, (input_vector, target_vector) in enumerate(
+#             zip(df[input_columns].values, df[target_columns].values)):
+#         # sample['input'] and ['output'] are pd.Series tables so convert them to normal list()
+#         # inputs = list(sample['input'])
+
+#         # the date we're trying to predict the threshold for
+#         timestamp = target_vector.index[0]
+#         for feature_name in sorted_features:
+#             if feature_name.startswith('morn'):
+#                 day = get_day(series, date=timestamp.date())
+#                 morning_loads = (day.values[:morn] - mean) / std
+#                 if verbosity > 2:
+#                     print('day = {0} and morning = {1}'.format(len(day), len(morning_loads)))
+#                 inputs = list(morning_loads) + inputs
+#             elif feature_name == 'dow':
+#                 dow_bits = [0] * 7
+#                 dow_bits[timestamp.weekday()] = bit_scale
+#                 inputs = dow_bits + inputs
+#             elif feature_name == 'moy':
+#                 moy_bits = [0] * 12
+#                 moy_bits[timestamp.month - 1] = bit_scale
+#                 inputs = moy_bits + inputs
+#             elif feature_name == 'woy':
+#                 inputs = [(timestamp.weekofyear - 26.) * 3 * bit_scale / 52] + inputs
+#             elif feature_name == 'date':
+#                 inputs = [(timestamp.date().toordinal() - first_date - date_range / 2.) * 3 * bit_scale / date_range
+#                           ] + inputs
+
+#             if pd.isnull(inputs).any():
+#                 msg = 'Feature "{0}" within the feature list: {1} created null/NaN input values\n'.format(
+#                     feature_name, sorted_features)
+#                 msg += 'For sample {} and date {}\n'.format(sampnum, timestamp)
+#                 msg += 'Input vector positions {}:\nInput vector: {}'.format(
+#                     ann.table_nan_locs(inputs), inputs)
+#                 msg += '\nBuilding load Series:\n{0}\n'.format(series)
+#                 if ignore_nans:
+#                     warnings.warn(msg)
+#                 else:
+#                     raise ValueError(msg)
+
+#         ds.addSample(inputs, list(target_vector.values))
+
+
+def input_dataset_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=None, normalize=True, verbosity=1):
     """ Build a dataset with an empty output/target vector
 
     Identical to `dataset_from_dataframe`, except that default values for 2 arguments:
         outputs: None
-        include_last: True
     """
-    return dataset_from_dataframe(df=df, delays=delays, inputs=inputs, outputs=outputs, normalize=normalize, include_last=include_last, verbosity=verbosity)
+    return dataset_from_dataframe(df=df, delays=delays, inputs=inputs, outputs=outputs,
+                                  normalize=normalize, verbosity=verbosity)
 
 
-def inputs_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=None, normalize=True, include_last=True, verbosity=1):
+def inputs_from_dataframe(df, delays=(1, 2, 3), inputs=(1, 2, -1), outputs=None, normalize=True, verbosity=1):
     """ Build a sequence of vectors suitable for "activation" by a neural net
 
     Identical to `dataset_from_dataframe`, except that only the input vectors are
     returned (not a full DataSet instance) and default values for 2 arguments are changed:
         outputs: None
-        include_last: True
 
     And only the input vectors are return
     """
-    ds = input_dataset_from_dataframe(df=df, delays=delays, inputs=inputs, outputs=outputs, normalize=normalize, include_last=include_last, verbosity=verbosity)
+    ds = input_dataset_from_dataframe(df=df, delays=delays, inputs=inputs, outputs=outputs,
+                                      normalize=normalize, verbosity=verbosity)
     return ds['input']
 
 
@@ -345,7 +387,7 @@ def weight_matrices(nn):
     except:
         pass
 
-    # Network objects are ParameterContainer's too, but won't reshape into a single matrix, 
+    # Network objects are ParameterContainer's too, but won't reshape into a single matrix,
     # so this must come after try nn.connections
     if isinstance(nn, (ParameterContainer, Connection)):
         return reshape(nn.params, (nn.outdim, nn.indim))
@@ -386,7 +428,8 @@ def weight_matrices(nn):
 #     if verbosity > 0:
 #         print('dataset_from_thresh(features={0})'.format(features))
 
-#     samples, mean, std, thresh = simple_dataset_from_thresh(thresh, N=N, max_window=max_window, normalize=normalize, ignore_below=ignore_below)
+#     samples, mean, std, thresh = simple_dataset_from_thresh(thresh, N=N, max_window=max_window,
+#                                                             normalize=normalize, ignore_below=ignore_below)
 
 #     name = getattr(thresh, 'name', None)
 #     if name:
@@ -405,7 +448,8 @@ def weight_matrices(nn):
 #         else:
 #             name = None
 
-#     # Compute the length of extra features added on to the vector from the rolling window of previous threshold values
+#     # Compute the length of extra features added on to the vector from the rolling window of previous
+#     # threshold values
 #     # TODO: pre-process features list of strings in a separate function
 #     morn = 0
 
@@ -417,12 +461,14 @@ def weight_matrices(nn):
 #                     morn = int(s[4:])
 #                 except:
 #                     if verbosity > 0:
-#                         warnings.warn('Unable to determine morning length from feature named "{0}" so using default (8 am = 8 * 4 = 32)')
+#                         warnings.warn('Unable to determine morning length from feature named "{0}" so using default '
+#                                       '(8 am = 8 * 4 = 32)')
 #                     morn = 32  # default to 9 am morning ending
 #                 break
 
 #     if verbosity > 0:
-#         print('In dataset_from_thresh() using {0} morning load values for Building {1} because series arg is of type {2}'.format(morn, name, type(series)))
+#         print('In dataset_from_thresh() using {0} morning load values for Building {1}'
+#               ' because series arg is of type {2}'.format(morn, name, type(series)))
 
 #     extras = (+ int('dow' in features) * 7
 #               + int('moy' in features) * 12
@@ -437,10 +483,11 @@ def weight_matrices(nn):
 #     last_date = samples[-1]['target'].index[0].date().toordinal()
 #     date_range = (last_date - first_date) or 1
 
-#     bit_scale = 5  # number of standard deviations for the magnitude of bit            
+#     bit_scale = 5  # number of standard deviations for the magnitude of bit
 
 #     if verbosity > 0:
-#         print('Adding features for building {3}, {0}, and a morning time series of len {2}, to each of the {1} vectors (samples)'.format(features, len(samples), morn, name))
+#         print('Adding features for building {3}, {0}, and a morning time series of len {2}, '
+#               'to each of the {1} vectors (samples)'.format(features, len(samples), morn, name))
 
 #     for sampnum, sample in enumerate(samples):
 #         # sample['input'] and ['output'] are pd.Series tables so convert them to normal list()
@@ -465,10 +512,12 @@ def weight_matrices(nn):
 #             elif feature_name == 'woy':
 #                 inputs = [(timestamp.weekofyear - 26.) * 3 * bit_scale / 52] + inputs
 #             elif feature_name == 'date':
-#                 inputs = [(timestamp.date().toordinal() - first_date - date_range / 2.) * 3 * bit_scale / date_range ] + inputs
+#                 inputs = [(timestamp.date().toordinal() - first_date - date_range / 2.) * 3 * bit_scale /
+#                            date_range ] + inputs
 
 #             if pd.isnull(inputs).any():
-#                 msg = 'Feature "{0}" within the feature list: {1} created null/NaN input values\nFor sample {2} and date {3}\nInput vector positions {4}:\nInput vector: {5}'.format(
+#                 msg = 'Feature "{0}" within the feature list: {1} created null/NaN input values\nFor sample {2}'
+#                       ' and date {3}\nInput vector positions {4}:\nInput vector: {5}'.format(
 #                     feature_name, sorted_features, sampnum, timestamp, ann.table_nan_locs(inputs), inputs)
 #                 msg += '\nBuilding load Series:\n{0}\n'.format(series)
 #                 if ignore_nans:
@@ -532,7 +581,7 @@ def plot_network_results(network, ds=None, mean=0, std=1, title='', show=True, s
     if save:
         filename = 'ann_performance_for_{0}.png'.format(title).replace(' ', '_')
         if isinstance(save, basestring) and os.path.isdir(save):
-            filename = os.path.join(save, filename) 
+            filename = os.path.join(save, filename)
         plt.savefig(filename)
     if not show:
         plt.clf()
@@ -547,13 +596,13 @@ def trainer_results(trainer, mean=0, std=1, title='', show=True, save=True):
 
         output * std + mean
 
-    Which inverses the normalization 
+    Which inverses the normalization
 
         (output - mean) / std
 
     Args:
         trainer (Trainer): a pybrain Trainer instance containing a valid Network and DataSet
-        ds (DataSet): a pybrain DataSet to override the one contained in `trainer`. 
+        ds (DataSet): a pybrain DataSet to override the one contained in `trainer`.
           Required if trainer is a Network instance rather than a Trainer instance.
         mean (float): mean of the denormalized dataset (default: 0)
           Only affects the scale of the plot
@@ -563,7 +612,8 @@ def trainer_results(trainer, mean=0, std=1, title='', show=True, save=True):
     Returns:
         3-tuple: (trainer, mean, std), A trainer/dataset along with denormalization info
     """
-    return plot_network_results(network=trainer.module, ds=trainer.ds, mean=mean, std=std, title=title, show=show, save=save)
+    return plot_network_results(network=trainer.module, ds=trainer.ds, mean=mean, std=std, title=title,
+                                show=show, save=save)
 
 
 def sim_trainer(trainer, mean=0, std=1):
@@ -579,7 +629,7 @@ def sim_network(network, ds=None, index=None, mean=0, std=1):
 
         denormalized_output = normalized_output * std + mean
 
-    Which inverses the normalization that produced the normalized output in the first place: 
+    Which inverses the normalization that produced the normalized output in the first place: \
 
         normalized_output = (denormalzied_output - mean) / std
 
@@ -594,12 +644,18 @@ def sim_network(network, ds=None, index=None, mean=0, std=1):
     Returns:
         DataFrame: DataFrame with columns "Output" and "Target" suitable for df.plot-ting
     """
-    # just in case network is a trainer or has a Module-derived instance as one of it's attributes
-    if hasattr(network, 'module') and hasattr(network.module, 'activate'):  # isinstance(network.module, (networks.Network, modules.Module))
+    # just in case network is a trainer or has a Module-derived instance as one of it's attribute
+       # isinstance(network.module, (networks.Network, modules.Module))
+    if hasattr(network, 'module') and hasattr(network.module, 'activate'):
+        # may want to also check: isinstance(network.module, (networks.Network, modules.Module))
         network = network.module
     ds = ds or network.ds
     if not ds:
-        raise RuntimeError("Unable to find a `pybrain.DataSet` instance to activate the Network with in order to plot the outputs. A dataset can be provided as part of a network instance or as a separate kwarg if `network` is used to provide the `pybrain.Network` instance directly.")
-    results_generator = ((network.activate(ds['input'][i])[0] * std + mean, ds['target'][i][0] * std + mean) for i in xrange(len(ds['input'])))
-    
+        raise RuntimeError("Unable to find a `pybrain.datasets.DataSet` instance to activate the Network with, "
+                           " to plot the outputs. A dataset can be provided as part of a network instance or "
+                           "as a separate kwarg if `network` is used to provide the `pybrain.Network`"
+                           " instance directly.")
+    results_generator = ((network.activate(ds['input'][i])[0] * std + mean, ds['target'][i][0] * std + mean)
+                         for i in xrange(len(ds['input'])))
+
     return pd.DataFrame(results_generator, columns=['Output', 'Target'], index=index or range(len(ds['input'])))

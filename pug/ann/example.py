@@ -61,7 +61,7 @@ def train_weather_predictor(
 
     """
     df = weather.daily(location, years=years, use_cache=use_cache, verbosity=verbosity).sort()
-    ds = util.dataset_from_dataframe(df, normalize=False, delays=delays, inputs=inputs, outputs=outputs, include_last=False, verbosity=verbosity)
+    ds = util.dataset_from_dataframe(df, normalize=False, delays=delays, inputs=inputs, outputs=outputs, verbosity=verbosity)
     nn = util.ann_from_ds(ds, N_hidden=N_hidden, verbosity=verbosity)
     trainer = util.build_trainer(nn, ds=ds, verbosity=verbosity)
     trainer.trainEpochs(epochs)
@@ -242,7 +242,7 @@ class BalanceTask(EpisodicTask):
 
     def reset(self):
         EpisodicTask.reset(self)
-        self.day = weather.get_day(date='random')
+        self.day = weather.daily(date='random')
         self.t = 0
 
     def performAction(self, action):
