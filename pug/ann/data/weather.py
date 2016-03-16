@@ -6,8 +6,10 @@ import json
 import warnings
 
 import pandas as pd
-np = pd.np
+
 from pug.nlp import util, env
+
+np = pd.np
 
 
 DATA_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -42,7 +44,7 @@ def hourly(location='Fresno, CA', days=1, start=None, end=None, years=1, use_cac
     if isinstance(days, int):
         start = start or None
         end = end or datetime.datetime.today().date()
-        days = pd.date_range(end=end, periods=days)
+        days = pd.date_range(start=start, end=end, periods=days)
 
     # refresh the cache each calendar month or each change in the number of days in the dataset
     cache_path = 'hourly-{}-{}-{:02d}-{:04d}.csv'.format(airport_code, days[-1].year, days[-1].month, len(days))
@@ -118,8 +120,8 @@ def api(feature='conditions', city='Portland', state='OR', key=None):
         >>> api('hurric', 'Boise', 'ID')  # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
         {u'currenthurricane': ...}}}
 
-        >>> features = 'alerts astronomy conditions currenthurricane forecast forecast10day geolookup history hourly hourly10day planner rawtide satellite tide webcams yesterday'.split(' ')
-
+        >>> features = ('alerts astronomy conditions currenthurricane forecast forecast10day geolookup history hourly hourly10day ' +
+        ...             'planner rawtide satellite tide webcams yesterday').split(' ')
         >> everything = [api(f, 'Portland') for f in features]
         >> js = api('alerts', 'Portland', 'OR')
         >> js = api('condit', 'Sacramento', 'CA')
@@ -129,8 +131,8 @@ def api(feature='conditions', city='Portland', state='OR', key=None):
         >> js = api('hist', 'history', 'AL')
         >> js = api('astro')
     """
-
-    features = 'alerts astronomy conditions currenthurricane forecast forecast10day geolookup history hourly hourly10day planner rawtide satellite tide webcams yesterday'.split(' ')
+    features = ('alerts astronomy conditions currenthurricane forecast forecast10day geolookup history hourly hourly10day ' +
+                'planner rawtide satellite tide webcams yesterday').split(' ')
     feature = util.fuzzy_get(features, feature)
     # Please be kind and use your own key (they're FREE!):
     # http://www.wunderground.com/weather/api/d/login.html
@@ -154,7 +156,7 @@ def daily(location='Fresno, CA', years=1, use_cache=True, verbosity=1):
     >>> 364 <= len(df) <= 365
     True
     >>> df.columns
-    Index([u'PST', u'Max TemperatureF', u'Mean TemperatureF', u'Min TemperatureF', u'Max Dew PointF', u'MeanDew PointF', u'Min DewpointF', u'Max Humidity', u'Mean Humidity', u'Min Humidity', u'Max Sea Level PressureIn', u'Mean Sea Level PressureIn', u'Min Sea Level PressureIn', u'Max VisibilityMiles', u'Mean VisibilityMiles', u'Min VisibilityMiles', u'Max Wind SpeedMPH', u'Mean Wind SpeedMPH', u'Max Gust SpeedMPH', u'PrecipitationIn', u'CloudCover', u'Events', u'WindDirDegrees'], dtype='object')
+    Index([u'PST', u'Max TemperatureF', u'Mean TemperatureF', u'Min TemperatureF', u'Max Dew PointF', u'MeanDew PointF', u'Min DewpointF', ...
     """
     this_year = datetime.date.today().year
     if isinstance(years, (int, float)):
@@ -178,9 +180,9 @@ def daily(location='Fresno, CA', years=1, use_cache=True, verbosity=1):
 
     df = pd.DataFrame()
     for year in years:
-        url = ('http://www.wunderground.com/history/airport/{airport}/{yearstart}/1/1/'
-               + 'CustomHistory.html?dayend=31&monthend=12&yearend={yearend}'
-               + '&req_city=&req_state=&req_statename=&reqdb.zip=&reqdb.magic=&reqdb.wmo=&MR=1&format=1').format(
+        url = ('http://www.wunderground.com/history/airport/{airport}/{yearstart}/1/1/' +
+               'CustomHistory.html?dayend=31&monthend=12&yearend={yearend}' +
+               '&req_city=&req_state=&req_statename=&reqdb.zip=&reqdb.magic=&reqdb.wmo=&MR=1&format=1').format(
             airport=airport_code,
             yearstart=year,
             yearend=year
