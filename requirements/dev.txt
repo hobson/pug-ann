@@ -12,7 +12,7 @@ Unidecode==0.04.16
 cffi>=0.8.6
 chardet==2.3.0
 
-pyOpenSSL==0.14
+pyOpenSSL==17.5.0
 pytz>=2014.10
 python-dateutil>=2.4.1
 
