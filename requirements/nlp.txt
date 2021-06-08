@@ -7,7 +7,7 @@ fuzzywuzzy==0.5.0
 # ipython[all]
 matplotlib>=1.4.3
 pandas>=0.15.2
-Pillow==2.7
+Pillow==8.2.0
 pip==6.0.8
 progressbar2==2.7.3
 pyOpenSSL==0.14
